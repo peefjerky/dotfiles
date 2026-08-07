@@ -1,0 +1,155 @@
+2026-07-28T22:43:43.106921Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=37635
+2026-07-28T22:43:43.106992Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-07-28T22:43:43.350613Z  INFO herdr::client: handshake succeeded version=17 encoding=SemanticFrame
+2026-07-28T22:44:42.737259Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=40796
+2026-07-28T22:44:42.737287Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-07-28T22:44:42.921520Z  INFO herdr::client: handshake succeeded version=17 encoding=SemanticFrame
+2026-07-28T23:11:53.265077Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=112369
+2026-07-28T23:11:53.265139Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-07-28T23:11:53.488752Z  INFO herdr::client: handshake succeeded version=17 encoding=SemanticFrame
+2026-07-28T23:12:12.262042Z  INFO herdr::logging: herdr exiting event="app.shutdown" subsystem="client" outcome="completed" pid=112369
+2026-07-28T23:13:07.594686Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=117188
+2026-07-28T23:13:07.594727Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-07-28T23:13:07.830539Z  INFO herdr::client: handshake succeeded version=17 encoding=SemanticFrame
+2026-07-29T03:46:21.702629Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=759229
+2026-07-29T03:46:21.702772Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-07-29T03:46:21.761296Z  INFO herdr::client: handshake succeeded version=17 encoding=SemanticFrame
+2026-07-29T03:51:40.501440Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=4106
+2026-07-29T03:51:40.501942Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-07-29T03:51:40.721451Z  INFO herdr::client: handshake succeeded version=17 encoding=SemanticFrame
+2026-07-29T08:55:02.046595Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=4325
+2026-07-29T08:55:02.047111Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-07-29T08:55:02.287848Z  INFO herdr::client: handshake succeeded version=17 encoding=SemanticFrame
+2026-07-29T19:47:42.931655Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=9794
+2026-07-29T19:47:42.931880Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-07-29T19:47:43.174052Z  INFO herdr::client: handshake succeeded version=17 encoding=SemanticFrame
+2026-07-31T16:21:15.184556Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=21837
+2026-07-31T16:21:15.185002Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-07-31T16:21:15.426089Z  INFO herdr::client: handshake succeeded version=17 encoding=SemanticFrame
+2026-07-31T22:13:56.927819Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=87017
+2026-07-31T22:13:56.928393Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-07-31T22:13:57.159822Z  INFO herdr::client: handshake succeeded version=17 encoding=SemanticFrame
+2026-07-31T22:21:11.810731Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=3978
+2026-07-31T22:21:11.811416Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-07-31T22:21:12.043473Z  INFO herdr::client: handshake succeeded version=17 encoding=SemanticFrame
+2026-07-31T22:22:53.500242Z  WARN herdr::sound: sound playback failed sound=Request err=no mp3-capable audio player available: paplay failed: paplay playback timed out after 15s; pw-play failed: pw-play playback timed out after 15s; ffplay failed: ffplay playback timed out after 15s; mpg123 failed: mpg123 playback timed out after 15s; mpv failed: mpv playback timed out after 15s
+2026-07-31T23:31:40.259232Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=32292
+2026-07-31T23:31:40.259620Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-07-31T23:31:40.475906Z  INFO herdr::client: handshake succeeded version=17 encoding=SemanticFrame
+2026-08-01T00:33:01.347066Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=3533
+2026-08-01T00:33:01.347558Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-01T00:33:01.349759Z  INFO herdr::client: handshake succeeded version=17 encoding=SemanticFrame
+2026-08-01T01:34:24.181713Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=3269
+2026-08-01T01:34:24.182065Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-01T01:34:24.424119Z  INFO herdr::client: handshake succeeded version=17 encoding=SemanticFrame
+2026-08-01T02:18:55.236174Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=2873
+2026-08-01T02:18:55.236491Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-01T02:18:55.448021Z  INFO herdr::client: handshake succeeded version=17 encoding=SemanticFrame
+2026-08-01T03:28:12.678329Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=32015
+2026-08-01T03:28:12.678449Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-01T03:28:12.841202Z  INFO herdr::client: handshake succeeded version=17 encoding=SemanticFrame
+2026-08-02T11:22:45.982306Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=15685
+2026-08-02T11:22:45.983707Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-02T11:22:45.985493Z  INFO herdr::client: handshake succeeded version=17 encoding=SemanticFrame
+2026-08-02T12:15:51.218359Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=65490
+2026-08-02T12:15:51.218478Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-02T12:15:51.310197Z  INFO herdr::client: handshake succeeded version=17 encoding=SemanticFrame
+2026-08-02T14:52:55.044350Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=3277
+2026-08-02T14:52:55.044551Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-02T14:52:55.046114Z  INFO herdr::client: handshake succeeded version=17 encoding=SemanticFrame
+2026-08-02T17:56:19.383265Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=81056
+2026-08-02T17:56:19.383344Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-02T17:56:19.624967Z  INFO herdr::client: handshake succeeded version=17 encoding=SemanticFrame
+2026-08-03T11:41:12.182305Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=42992
+2026-08-03T11:41:12.182799Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-03T11:41:12.410973Z  INFO herdr::client: handshake succeeded version=17 encoding=SemanticFrame
+2026-08-03T14:04:59.779829Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=192489
+2026-08-03T14:04:59.779864Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-03T14:05:00.023113Z  INFO herdr::client: handshake succeeded version=17 encoding=SemanticFrame
+2026-08-04T06:51:08.770241Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=876465
+2026-08-04T06:51:08.770604Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-04T06:51:08.886598Z  INFO herdr::client: handshake succeeded version=17 encoding=SemanticFrame
+2026-08-04T08:30:11.618482Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=13664
+2026-08-04T08:30:11.618968Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-04T08:30:11.735500Z  INFO herdr::client: handshake succeeded version=17 encoding=SemanticFrame
+2026-08-04T10:37:58.455748Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=172628
+2026-08-04T10:37:58.456124Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-04T10:37:58.501048Z  INFO herdr::client: handshake succeeded version=17 encoding=SemanticFrame
+2026-08-04T11:58:34.794429Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=189335
+2026-08-04T11:58:34.794762Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-04T11:58:35.037754Z  INFO herdr::client: handshake succeeded version=19 encoding=SemanticFrame
+2026-08-04T16:41:13.565535Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=2831
+2026-08-04T16:41:13.566245Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-04T16:41:13.784369Z  INFO herdr::client: handshake succeeded version=19 encoding=SemanticFrame
+2026-08-04T22:19:49.979203Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=272515
+2026-08-04T22:19:49.979242Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-04T22:19:50.075187Z  INFO herdr::client: handshake succeeded version=19 encoding=SemanticFrame
+2026-08-04T22:36:16.137067Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=292473
+2026-08-04T22:36:16.137137Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-04T22:36:16.279061Z  INFO herdr::client: handshake succeeded version=19 encoding=SemanticFrame
+2026-08-05T01:07:50.269357Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=497294
+2026-08-05T01:07:50.270222Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-05T01:07:50.476821Z  INFO herdr::client: handshake succeeded version=19 encoding=SemanticFrame
+2026-08-05T11:06:45.032885Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=3906
+2026-08-05T11:06:45.033005Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-05T11:06:45.035401Z  INFO herdr::client: handshake succeeded version=19 encoding=SemanticFrame
+2026-08-05T11:08:05.945193Z  WARN herdr::sound: sound playback failed sound=Request err=no mp3-capable audio player available: paplay failed: paplay playback timed out after 15s; pw-play failed: pw-play playback timed out after 15s; ffplay failed: ffplay playback timed out after 15s; mpg123 failed: mpg123 playback timed out after 15s; mpv failed: mpv playback timed out after 15s
+2026-08-05T11:11:04.494241Z  WARN herdr::sound: sound playback failed sound=Done err=no mp3-capable audio player available: paplay failed: paplay playback timed out after 15s; pw-play failed: pw-play playback timed out after 15s; ffplay failed: ffplay playback timed out after 15s; mpg123 failed: mpg123 playback timed out after 15s; mpv failed: mpv playback timed out after 15s
+2026-08-05T11:46:02.159138Z  WARN herdr::sound: sound playback failed sound=Done err=no mp3-capable audio player available: paplay failed: paplay playback timed out after 15s; pw-play failed: pw-play playback timed out after 15s; ffplay failed: ffplay playback timed out after 15s; mpg123 failed: mpg123 playback timed out after 15s; mpv failed: mpv playback timed out after 15s
+2026-08-05T12:28:46.422857Z  WARN herdr::sound: sound playback failed sound=Done err=no mp3-capable audio player available: paplay failed: paplay playback timed out after 15s; pw-play failed: pw-play playback timed out after 15s; ffplay failed: ffplay playback timed out after 15s; mpg123 failed: mpg123 playback timed out after 15s; mpv failed: mpv playback timed out after 15s
+2026-08-05T14:26:40.514278Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=63671
+2026-08-05T14:26:40.514565Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-05T14:26:40.763499Z  INFO herdr::client: handshake succeeded version=19 encoding=SemanticFrame
+2026-08-05T14:30:20.311635Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=74701
+2026-08-05T14:30:20.311663Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-05T14:30:20.502395Z  INFO herdr::client: handshake succeeded version=19 encoding=SemanticFrame
+2026-08-05T22:11:39.896957Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=3294
+2026-08-05T22:11:39.897550Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-05T22:11:40.148292Z  INFO herdr::client: handshake succeeded version=19 encoding=SemanticFrame
+2026-08-05T23:29:58.516621Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=12317
+2026-08-05T23:29:58.517065Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-05T23:29:58.753132Z  INFO herdr::client: handshake succeeded version=19 encoding=SemanticFrame
+2026-08-05T23:46:35.913988Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=2718
+2026-08-05T23:46:35.914183Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-05T23:46:36.158741Z  INFO herdr::client: handshake succeeded version=19 encoding=SemanticFrame
+2026-08-06T01:08:43.368558Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=176618
+2026-08-06T01:08:43.368596Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-06T01:08:43.498948Z  INFO herdr::client: handshake succeeded version=19 encoding=SemanticFrame
+2026-08-06T01:56:49.566115Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=238548
+2026-08-06T01:56:49.567044Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-06T01:56:49.743918Z  INFO herdr::client: handshake succeeded version=19 encoding=SemanticFrame
+2026-08-06T02:34:55.184756Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=284652
+2026-08-06T02:34:55.184790Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-06T02:34:55.416324Z  INFO herdr::client: handshake succeeded version=19 encoding=SemanticFrame
+2026-08-06T03:40:35.621392Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=368799
+2026-08-06T03:40:35.621532Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-06T03:40:35.622468Z  INFO herdr::client: handshake succeeded version=19 encoding=SemanticFrame
+2026-08-06T05:29:07.749845Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=479417
+2026-08-06T05:29:07.750306Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-06T05:29:07.907225Z  INFO herdr::client: handshake succeeded version=19 encoding=SemanticFrame
+2026-08-06T05:45:19.633181Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=487223
+2026-08-06T05:45:19.633300Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-06T05:45:19.877336Z  INFO herdr::client: handshake succeeded version=19 encoding=SemanticFrame
+2026-08-06T05:47:47.745662Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=488719
+2026-08-06T05:47:47.745725Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-06T05:47:47.983435Z  INFO herdr::client: handshake succeeded version=19 encoding=SemanticFrame
+2026-08-06T11:53:53.473123Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=8016
+2026-08-06T11:53:53.473970Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-06T11:53:53.707973Z  INFO herdr::client: handshake succeeded version=19 encoding=SemanticFrame
+2026-08-06T11:55:24.045931Z  WARN herdr::sound: sound playback failed sound=Request err=no mp3-capable audio player available: paplay failed: paplay playback timed out after 15s; pw-play failed: pw-play playback timed out after 15s; ffplay failed: ffplay playback timed out after 15s; mpg123 failed: mpg123 playback timed out after 15s; mpv failed: mpv playback timed out after 15s
+2026-08-07T19:22:41.937754Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=2709
+2026-08-07T19:22:41.938576Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-07T19:22:41.949810Z  INFO herdr::client: handshake succeeded version=19 encoding=SemanticFrame
+2026-08-07T19:48:05.985152Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=2998
+2026-08-07T19:48:05.985712Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-07T19:48:05.991291Z  INFO herdr::client: handshake succeeded version=19 encoding=SemanticFrame
+2026-08-07T20:05:30.432058Z  WARN herdr::sound: sound playback failed sound=Done err=no mp3-capable audio player available: paplay failed: paplay playback timed out after 15s; pw-play failed: pw-play playback timed out after 15s; ffplay failed: ffplay playback timed out after 15s; mpg123 failed: mpg123 playback timed out after 15s; mpv failed: mpv playback timed out after 15s
+2026-08-07T20:14:18.094416Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=2584
+2026-08-07T20:14:18.095115Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-07T20:14:18.342210Z  INFO herdr::client: handshake succeeded version=19 encoding=SemanticFrame
+2026-08-07T20:29:29.172978Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=2700
+2026-08-07T20:29:29.173750Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-07T20:29:29.179347Z  INFO herdr::client: handshake succeeded version=19 encoding=SemanticFrame
+2026-08-07T20:54:18.758364Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=2733
+2026-08-07T20:54:18.758746Z  INFO herdr::client: connecting to server path=/home/peef/.config/herdr/herdr-client.sock
+2026-08-07T20:54:18.759744Z  INFO herdr::client: handshake succeeded version=19 encoding=SemanticFrame

@@ -1,0 +1,1 @@
+ACTION=="add", SUBSYSTEM=="pci", ATTRS{vendor}=="0x106b", KERNEL=="0000:e6:00.1", RUN+="/usr/bin/systemd-run --no-block /usr/local/bin/t2-pci-wake.sh"

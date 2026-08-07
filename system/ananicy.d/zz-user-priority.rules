@@ -1,0 +1,3 @@
+{"name": "claude", "type": "IN_DIFF"}
+{"name": "herdr", "type": "LowLatency_RT"}
+{"name": "tiny-dfr", "type": "IN_DIFF"}

@@ -1,0 +1,30 @@
+general.import = ["/home/peef/.cache/wal/colors-alacritty.toml"]
+
+general.live_config_reload = true
+
+[cursor]
+unfocused_hollow = false
+
+[cursor.style]
+shape = "Block"
+
+[env]
+TERM = "alacritty"
+
+[window]
+dynamic_title = true
+opacity = 0.7
+
+[window.padding]
+x = 25
+y = 25
+
+[selection]
+save_to_clipboard = true
+
+[window.class]
+instance = "dict"
+general = "Alacritty"
+[font]
+size = 10
+normal = {family = "JetBrainsMono Nerd Font Propo", style = "Regular"}

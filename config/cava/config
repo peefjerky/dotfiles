@@ -1,0 +1,139 @@
+## ╔══════════════════════════════════════════════════════╗
+## ║        CAVA — VERDANT AQUA EDITION                   ║
+## ║         god-tier · max drama · unique patterns       ║
+## ╚══════════════════════════════════════════════════════╝
+##
+## Cross-platform config — works on Windows, macOS, and Linux.
+## The install.py at the repo root copies this to the right location
+## for your OS automatically.
+
+[general]
+
+# 120 fps: smooth on most monitors without burning resources.
+framerate = 120
+
+# Reload config live without restarting cava.
+live-config = 1
+
+# Boosted sensitivity: bars reach higher for the same input level.
+# Combined with the deep-V EQ below, bass and treble erupt dramatically.
+autosens = 1
+sensitivity = 150
+
+# 0 = auto-fit to terminal width — adapts to any window size.
+bars = 0
+
+# bar_width 1 + spacing 1: maximum bar density, every frequency band
+# gets its own column — patterns look far more unique and detailed.
+bar_width = 1
+bar_spacing = 1
+
+center_align = 1
+max_height = 100
+
+# 30 Hz sub-rumble → 17 kHz ultra-air: widest useful audible range.
+lower_cutoff_freq = 30
+higher_cutoff_freq = 17000
+
+sleep_timer = 0
+
+
+[input]
+
+# Windows: input is fully automatic via WASAPI loopback — leave commented.
+# Linux/macOS: uncomment the method that matches your audio system.
+#
+; method = pipewire   # Linux (modern — recommended)
+; source = auto
+;
+; method = pulse      # Linux (PulseAudio)
+; source = auto
+;
+; method = portaudio  # macOS
+; source = auto
+;
+; method = alsa       # Linux (bare ALSA)
+; source = hw:Loopback,1
+
+
+[output]
+
+# noncurses: works everywhere — Windows, macOS, Linux.
+# No ncursesw dependency. Frame-differential updates = less tearing.
+method = noncurses
+
+# Stereo mirror: low freqs bloom from center outward.
+channels = stereo
+
+# reverse = 1: treble at the outer edges, bass in the center.
+# Creates a distinctive W-shaped crown pattern on kick drums.
+reverse = 1
+
+# Eliminates flicker in Windows Terminal, Alacritty, kitty, WezTerm.
+synchronized_sync = 1
+
+# Flat baseline on silence — terminal stays styled when music stops.
+show_idle_bar_heads = 1
+
+
+[color]
+
+## ── VERDANT AQUA PALETTE ───────────────────────────────────────────────────
+## 8 stops: near-black forest floor → deep undergrowth → forest green →
+## vivid emerald → aquamarine → cyan-aqua → electric seafoam → crystal peak.
+##
+## The deep-V EQ means bass bars glow deep green while treble spikes
+## detonate into near-white aqua — every genre produces a different shape.
+## ────────────────────────────────────────────────────────────────────────────
+
+background = '#0B1A14'
+gradient = 1
+
+gradient_color_1 = '#071109'   # bar roots     — near-black forest floor
+gradient_color_2 = '#0D4025'   # sub-bass      — deep undergrowth
+gradient_color_3 = '#1A9C6B'   # bass          — rich forest-to-teal
+gradient_color_4 = '#2ED8A2'   # midrange      — vivid emerald
+gradient_color_5 = '#00E1C0'   # high-mids     — pure aquamarine
+gradient_color_6 = '#00F6D8'   # presence      — bright cyan-aqua
+gradient_color_7 = '#50FFF0'   # air           — electric seafoam
+gradient_color_8 = '#AAFFF0'   # peaks         — crystalline near-white aqua
+
+
+[smoothing]
+
+# Monstercat: neighboring bars interpolate — smooth mountain-range silhouette.
+monstercat = 1
+
+# Waves: softens bar tops into organic flowing curves.
+waves = 1
+
+# noise_reduction 40: fast and reactive — snaps to every transient.
+# Drum hits, plucks, and stabs each read as distinct visual events.
+# This is the key to patterns looking unique song-to-song.
+noise_reduction = 40
+
+
+[eq]
+
+## ── DEEP-V EQ CURVE ────────────────────────────────────────────────────────
+## Extreme U/V shape: sub-bass and air boosted hard, mids scooped deep.
+## This is the main driver of unique bar patterns per genre:
+##
+##   EDM / trap  — massive bass wall + crackling hi-hat spikes at the edges
+##   Rock        — kick punches up center, guitar sits mid-low
+##   Jazz        — warm low columns, delicate treble wisps at the flanks
+##   Classical   — sweeping mid-range architecture, gentle luminous peaks
+##
+## The deep mid-scoop (bands 4–6) prevents the "flat wall" look entirely.
+## ────────────────────────────────────────────────────────────────────────────
+
+1  = 2.80   # sub-bass slam    — 808s, kick fundamental, synth bass rumble
+2  = 2.20   # upper bass       — bass guitar body, kick punch
+3  = 1.60   # low mids         — warmth, cello, lower vocals
+4  = 0.50   # mids (scooped)   — keeps center open and readable
+5  = 0.20   # upper mids       — deepest scoop — guitar body, vocals
+6  = 0.35   # presence (scoop) — sibilance zone, kept deliberately quiet
+7  = 0.55   # upper presence   — beginning of treble recovery
+8  = 1.40   # lower treble     — snare crack, acoustic guitar attack
+9  = 2.10   # upper treble     — hi-hats, cymbals, string shimmer
+10 = 2.90   # air              — highest band fires like a firework

@@ -1,0 +1,13 @@
+body {
+  line-height: 1.6;
+  font-size: 1.1em;
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  color: #faf9f6 !important;
+}
+
+div[style*="page-break-after"], div[style*="page-break-before"], hr {
+  border: none;
+  border-top: 2px dashed #FFFFF80;
+  margin: 2em 0;
+}
+

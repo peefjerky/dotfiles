@@ -1,0 +1,40 @@
+# Browser data and caches
+config/thorium/
+config/chromium/
+config/google-chrome/
+config/zen/
+config/.zen/
+
+# Application state / databases
+config/spicetify/Backups/
+config/spicetify/.cache/
+
+# Secrets and keys
+*.pem
+*.key
+*.asc
+id_rsa
+id_ed25519
+
+# Fish shell compiled bytecode and history
+config/fish/fish_history
+config/fish/*.bak
+
+# Quickshell generated/runtime files
+config/quickshell/ii/modules/ii/overview/*.bak
+
+# Neovim plugins and state (managed by lazy.nvim / mason)
+config/nvim/lazy-lock.json
+config/nvim/plugin/
+config/nvim/.git/
+
+# Large binary / cache directories
+config/btop/themes/.git/
+config/easyeffects/irs/
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Staging artifacts
+dotfiles-staging/

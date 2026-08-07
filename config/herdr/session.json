@@ -1,0 +1,59 @@
+{
+  "version": 3,
+  "workspaces": [
+    {
+      "id": "wV",
+      "custom_name": null,
+      "identity_cwd": "/home/peef/.config/hypr",
+      "public_pane_numbers": {
+        "1": 1,
+        "2": 7
+      },
+      "next_public_pane_number": 8,
+      "public_tab_numbers": [
+        1
+      ],
+      "next_public_tab_number": 4,
+      "tabs": [
+        {
+          "custom_name": null,
+          "layout": {
+            "Split": {
+              "direction": "Horizontal",
+              "ratio": 0.5,
+              "first": {
+                "Pane": 1
+              },
+              "second": {
+                "Pane": 2
+              }
+            }
+          },
+          "panes": {
+            "1": {
+              "cwd": "/home/peef/.config/hypr",
+              "agent_session": {
+                "source": "herdr:claude",
+                "agent": "claude",
+                "kind": "id",
+                "value": "e31bfc43-de53-4a86-8c83-c9e9ce330ce0"
+              }
+            },
+            "2": {
+              "cwd": "/home/peef/.config/hypr"
+            }
+          },
+          "zoomed": false,
+          "focused": 1,
+          "root_pane": 1
+        }
+      ],
+      "active_tab": 0
+    }
+  ],
+  "active": 0,
+  "selected": 0,
+  "sidebar_width": 27,
+  "sidebar_section_split": 0.42857143,
+  "collapsed_space_keys": []
+}

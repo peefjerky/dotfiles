@@ -1,0 +1,7 @@
+[
+    {
+        "device": "alsa_output.pci-0000_e6_00.3.pro-output-0",
+        "device-description": "Apple Audio Device Pro",
+        "preset-name": "mbp"
+    }
+]
