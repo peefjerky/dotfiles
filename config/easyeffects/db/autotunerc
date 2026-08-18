@@ -1,0 +1,14 @@
+[sie][Autotune#0]
+bias=0
+bypass=true
+fastMode=true
+filter=0.02
+noteA=false
+noteASharp=false
+noteB=false
+noteCSharp=false
+noteD=false
+noteDSharp=false
+noteF=false
+noteFSharp=false
+noteGSharp=false

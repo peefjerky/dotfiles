@@ -1,0 +1,24 @@
+-- The notepad now lives INSIDE caelestia's shell, not as a separate Quickshell
+-- config, so there is nothing to autostart here any more.
+--
+-- Why it moved: as its own Wayland layer surface it sat above caelestia's, and
+-- caelestia's border casts a MultiEffect shadow inward into the border hole. A
+-- separate translucent surface on top of that shadow transmits ~15% of it as a dark
+-- band along its bottom edge. Caelestia's own panels have no band because they are
+-- inside the same flattened silhouette -- a merged blob has no internal edge, so no
+-- shadow is drawn at the seam. That is not reproducible from another process.
+--
+-- It is now a panel in caelestia's own tree, sharing its BlobGroup, which also gets
+-- it real blob merging with the launcher, sidebar and popouts.
+--
+-- Implementation: ~/.config/quickshell/caelestia/ shadows /etc/xdg/quickshell/caelestia/
+-- in Quickshell's search path. Everything there is a symlink to the packaged install
+-- except modules/notepad/ and three patched files (ContentWindow.qml, Panels.qml,
+-- Regions.qml). See ~/.config/quickshell/caelestia/modules/notepad/CAELESTIA-BLOBS.md.
+--
+-- After a caelestia-shell upgrade, re-run:
+--   ~/.config/quickshell/caelestia/modules/notepad/install.sh
+-- It refuses to touch anything if the mod would no longer apply cleanly.
+--
+-- SUPER+G still works: custom/keybinds.lua dispatches the global shortcut
+-- "notepad:toggle", which is now registered by caelestia's process instead.

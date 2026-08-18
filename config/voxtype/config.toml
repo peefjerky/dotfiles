@@ -1,0 +1,143 @@
+# voxtype — see /etc/voxtype/config.toml for the full annotated template.
+# Only keys that differ from the defaults belong here.
+
+# ONNX binary is active (`voxtype setup onnx --enable`), so Parakeet is available.
+# TDT v3 emits its own punctuation and capitalisation, which is why there is no
+# [output.post_process] LLM cleanup stage here.
+engine = "parakeet"
+
+state_file = "auto"
+
+[hotkey]
+# Hyprland drives the keybinds; the evdev hotkey would need `input` group.
+enabled = false
+
+[audio]
+device = "default"          # -> alsa_input.pci-0000_e6_00.3.BuiltinMic
+sample_rate = 16000
+max_duration_secs = 300     # default 60 is short for dictating a paragraph
+
+[parakeet]
+# int8 build: this CPU has avx512_vnni, so ONNX Runtime accelerates int8 in
+# hardware. Model stays resident (on_demand_loading = false) — 640 MB against
+# 10 GB free buys back ~1.2 s of load time on every single utterance.
+model = "parakeet-tdt-0.6b-v3-int8"
+model_type = "tdt"
+on_demand_loading = false
+
+[output]
+mode = "type"
+fallback_to_clipboard = true
+type_delay_ms = 0
+
+# Compositor integration. `voxtype setup compositor hyprland` was not used: it
+# writes a conf.d drop-in nothing sources, and its hooks call
+# `hyprctl dispatch submap <name>`, which is a syntax error on a Lua config.
+# Submaps are defined in ~/.config/caelestia/custom/keybinds.lua; the wrapper
+# translates to the Lua dispatch form. Absolute path because the systemd user
+# unit's PATH need not include ~/.local/bin.
+pre_recording_command = "/home/peefjerky/.local/bin/voxtype-submap voxtype_recording"
+pre_output_command = "/home/peefjerky/.local/bin/voxtype-submap voxtype_suppress"
+post_output_command = "/home/peefjerky/.local/bin/voxtype-submap reset"
+
+[output.notification]
+on_transcription = true
+
+[status]
+# caelestia already installs ttf-jetbrains-mono-nerd (manifest.toml hypr component).
+icon_theme = "nerd-font"
+
+[osd]
+# Default frontend is gtk4, which needs libgtk4-layer-shell.so.0 — not installed,
+# and the daemon respawn-looped on exit 127 because of it. The quickshell launcher
+# needs no extra runtime; `voxtype setup quickshell` put the QML tree in
+# ~/.local/share/voxtype/quickshell/. The voxtype-osd dispatcher searches
+# /usr/lib/voxtype/, so the missing /usr/bin symlink doesn't matter.
+frontend = "quickshell"
+
+# Visual only, no effect on transcription. Default 10.0 assumes voice peaks at
+# 0.1-0.3 full-scale; this mic measured 0.03 (-30.6 dBFS), so the waveform would
+# be a flat line at the default.
+waveform_gain = 30.0
+
+[vad]
+# Silero VAD (ggml-silero-vad.bin, 0.8 MB) via `voxtype setup vad`. Worth it here:
+# NOTE: backend = "auto" (what voxtype.io/docs/USER_MANUAL suggests) resolves to
+# Energy VAD on this box -- verified in the daemon log. Energy thresholding is
+# precisely what a low-SNR mic defeats, so the Silero model is pinned explicitly.
+# this mic sits ~11 dB above a flat noise floor, and both whisper and Parakeet
+# hallucinate text on near-silence. Trimming non-speech is the cheap guard.
+enabled = true
+backend = "whisper"
+threshold = 0.3
+
+[text]
+# Proper nouns Parakeet has no chance at. Its documented failure mode is
+# substituting phonetically similar common words, which the journal confirms on
+# this machine: "voxtype" -> "box type", "caelestia" -> "KLestia", "caps lock"
+# -> "caps log", "ananicy cpp" -> "N C". Matching is case-insensitive.
+#
+# Multi-word keys are used deliberately over bare first names: mapping a lone
+# honorific like "mam" would rewrite it in every unrelated sentence.
+
+[text.replacements]
+# TrataTech -- two words in, one word out.
+"trata tech"    = "TrataTech"
+"trada tech"    = "TrataTech"
+"prata tech"    = "TrataTech"
+"strata tech"   = "TrataTech"
+"tarata tech"   = "TrataTech"
+"trato tech"    = "TrataTech"
+"trata teck"    = "TrataTech"
+"trata tec"     = "TrataTech"
+
+# Preet Jha -- "Jha" has no English analogue, so it lands on "ja"/"jaa"/"za".
+"preet jha"     = "Preet Jha"
+"preet ja"      = "Preet Jha"
+"preet jaa"     = "Preet Jha"
+"preet za"      = "Preet Jha"
+"prit jha"      = "Preet Jha"
+"prit ja"       = "Preet Jha"
+"pret ja"       = "Preet Jha"
+"preeth jha"    = "Preet Jha"
+"preeth ja"     = "Preet Jha"
+"breet ja"      = "Preet Jha"
+
+# Deepak Sir -- "Deepak" is the risk; "the pack"/"dee pack" is the same
+# word-splitting error that produced "box type".
+"deepak sir"    = "Deepak Sir"
+"dipak sir"     = "Deepak Sir"
+"deepack sir"   = "Deepak Sir"
+"dee pack sir"  = "Deepak Sir"
+"the pack sir"  = "Deepak Sir"
+"deepak sar"    = "Deepak Sir"
+
+# Shraddha Ma'am -- the "shr" cluster and the apostrophe both get lost.
+"shraddha ma'am" = "Shraddha Ma'am"
+"shraddha mam"   = "Shraddha Ma'am"
+"shraddha mom"   = "Shraddha Ma'am"
+"shraddha man"   = "Shraddha Ma'am"
+"shradha mam"    = "Shraddha Ma'am"
+"shradha mom"    = "Shraddha Ma'am"
+"shrada mam"     = "Shraddha Ma'am"
+"sradha mam"     = "Shraddha Ma'am"
+"shradda mam"    = "Shraddha Ma'am"
+
+# ── Observed, not predicted ──────────────────────────────────────────────────
+# Actual output from dictating the four names: "TrataTech, preja, debugser,
+# shadam." TrataTech landed on its own; the other three collapse much harder
+# than phonetic guessing suggested -- the model fuses the whole name+honorific
+# into one token. These are the measured strings plus their near neighbours.
+"preja"          = "Preet Jha"
+"prejha"         = "Preet Jha"
+"pre ja"         = "Preet Jha"
+"debugser"       = "Deepak Sir"
+"debug ser"      = "Deepak Sir"
+"debug sir"      = "Deepak Sir"
+"de bug sir"     = "Deepak Sir"
+"debugsir"       = "Deepak Sir"
+"shadam"         = "Shraddha Ma'am"
+"shadaam"        = "Shraddha Ma'am"
+"shadham"        = "Shraddha Ma'am"
+"sha dam"        = "Shraddha Ma'am"
+"shraddam"       = "Shraddha Ma'am"

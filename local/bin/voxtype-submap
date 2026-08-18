@@ -1,0 +1,6 @@
+#!/bin/sh
+# hyprctl dispatch evaluates Lua and wraps its argument in hl.dispatch(...), so
+# voxtype's generated `hyprctl dispatch submap <name>` hooks are a syntax error
+# here. This wrapper exists so config.toml holds a plain command with no nested
+# quoting for voxtype's exec to mangle.
+exec hyprctl dispatch "hl.dsp.submap(\"$1\")"

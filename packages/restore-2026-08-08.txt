@@ -1,0 +1,232 @@
+# Package restore list — generated 2026-08-08
+# Old system: Arch + linux-t2 + dots-hyprland (228 explicit packages)
+# New system: CachyOS + linux-cachyos + caelestia
+# 168 of the 228 were missing. Curated below; commented lines are deliberate skips.
+
+## ---- REPO (pacman) — 78 installed ----
+7zip
+bleachbit
+chafa
+chromium
+crun
+dkms
+docker
+docker-buildx
+docker-compose
+filelight
+flatpak
+foliate
+fuse2
+gamemode
+gamescope
+gnome-disk-utility
+gnome-themes-extra
+gnome-tweaks
+gnu-free-fonts
+gradle
+gst-plugins-good
+gst-rtsp-server
+gum
+inkscape
+innoextract
+jdk11-openjdk
+lib32-gamemode
+lib32-libxi
+lib32-libxrandr
+lib32-ocl-icd
+libva-intel-driver
+libva-utils
+linux-apfs-rw-dkms
+lsof
+# EasyEffects optional deps — NOT optional in practice. lsp-plugins-lv2 backs the
+# limiter, compressor, equalizer, gate and multiband compressor; calf backs the
+# exciter and bass enhancer. Without them EasyEffects loads no plugins at all and
+# reports "Limiter cannot be used because Linux Studio Plugins is not installed".
+# Removed by mistake on 2026-08-08 while uninstalling qtractor, which had pulled
+# in the lsp-plugins meta as a clap-host provider; they read as DAW cruft but
+# were an original explicit install. Keep them listed.
+lsp-plugins-lv2
+calf
+lutris
+mangohud
+mosh
+nautilus
+ncdu
+neovim
+nwg-look
+obs-studio
+openbsd-netcat
+pipewire-libcamera
+plasma-browser-integration
+proton-vpn-cli
+python-pip
+python-pipx
+python-poetry-core
+python-yaml
+qbittorrent
+qt6-connectivity
+rofi
+sdl2_image
+sdl2_mixer
+sdl2_ttf
+solaar
+speedtest-cli
+sushi
+thermald
+thunderbird
+tiny-dfr
+tmux
+ttf-jetbrains-mono
+ttf-sourcecodepro-nerd
+ueberzugpp
+vala
+vulkan-tools
+wev
+wine-staging
+winetricks
+wlr-randr
+wmctrl
+yazi
+zathura-cb
+zathura-pdf-mupdf
+zenity
+zip
+
+## ---- AUR (yay) — 14 pending ----
+actions-for-nautilus-git
+apple-fonts
+catt
+cbonsai-git
+hyprshade
+miraclecast-git
+mkchromecast-git
+nicotine-plus-git
+nodejs-mjml
+qt6-avif-image-plugin
+thorium-browser-bin
+ttf-dm-fonts-git
+upscayl-bin
+yt-x-git
+
+## ---- SKIPPED: superseded shell stack ----
+#ags-hyprpanel-git
+#bluez-git
+#illogical-impulse-audio
+#illogical-impulse-backlight
+#illogical-impulse-basic
+#illogical-impulse-bibata-modern-classic-bin
+#illogical-impulse-fonts-themes
+#illogical-impulse-hyprland
+#illogical-impulse-kde
+#illogical-impulse-microtex-git
+#illogical-impulse-microtex-git-debug
+#illogical-impulse-portal
+#illogical-impulse-python
+#illogical-impulse-quickshell-git
+#illogical-impulse-screencapture
+#illogical-impulse-toolkit
+#illogical-impulse-widgets
+#neofetch
+
+## ---- REMOVED FROM THE SYSTEM 2026-08-08 (post-install audit) ----
+# Installed by the repo batch, then removed at the user's request. `pacman -Rns`
+# took these 14 plus 59 dependencies, 73 packages total.
+#calf #lsp-plugins #sox    # LV2/VST suites; only pay off inside a DAW
+#                            NOTE: removing lsp-plugins also swept up `qtractor`, a
+#                            full DAW that had been pulled in silently as its clap-host
+#                            provider when --noconfirm auto-picked provider 1 of 6.
+#thefuck                   # needed shell integration that was never set up
+#cmatrix #astroterm        # toys
+#dictd                     # a dictionary *server* with no dictionary databases
+#kexec-tools               # niche, and this system boots limine
+#stress-ng #s-tui          # benchmark/monitor (stress-ng also brought in apparmor)
+#qemu-base #virt-manager #virt-viewer #vde2
+#                          # the whole virtualisation stack, removed as one unit
+
+## ---- SKIPPED: the package is ALREADY INSTALLED ----
+#iio-sensor-proxy-git  # iio-sensor-proxy 3.9-1.1 is installed (pulled in by kwin), the
+#                        service is active, and it already reports the ALS. The -git
+#                        package declares Conflicts:iio-sensor-proxy, so installing it
+#                        would have forced the repo package out and broken kwin's
+#                        dependency. The ambient light sensor finding still stands —
+#                        it just needed no new package.
+#protonup-qt           # protonup-qt 2.15.1-1 already installed from the cachyos repo,
+#                        explicitly, before this restore began.
+#
+# LESSON: verifying that a package's *purpose* is valid is not the same as verifying the
+# package is *needed*. Check `pacman -Q <name>` and the AUR Provides/Conflicts fields for
+# every candidate before recommending it.
+
+## ---- SKIPPED: redundant with something already installed (audit 2026-08-08) ----
+# Cut from the AUR list before installing. thorium-browser-bin was KEPT out of this
+# group at the user's request — it is the designated work browser.
+#pfetch                # fastfetch installed
+#grimblast-git         # grim + slurp installed; caelestia has `caelestia screenshot`
+#qdirstat              # would be the 3rd disk-usage tool after ncdu + filelight
+#light                 # brightnessctl installed and already called by the keybinds
+#cpufreqctl            # power-profiles-daemon owns frequency policy
+#pwvucontrol           # caelestia has audio controls
+#blueman-git           # caelestia has Bluetooth; bluez-utils covers the CLI
+#octopi                # GUI over pacman; everything here is CLI-driven
+#dracula-gtk-theme #gtk-engine-murrine
+#                      # actively fights caelestia's Material You regeneration
+#gopreload-git         # preload daemon from the HDD era; NVMe + zram + ananicy-cpp
+#apfs-fuse-git         # linux-apfs-rw-dkms is installed and is read-WRITE
+#helium-browser-bin    # 4th browser; also the source of the stale-mirror detour
+#kdeconnect-git #hypr-kdeconnect-fix-git
+#                      # dropped 2026-08-08: kdeconnect-git builds from source. The
+#                        -fix companion does nothing on its own, so both go together.
+
+## ---- SKIPPED: dropped by user 2026-08-08 ----
+#android-platform #android-sdk #android-sdk-build-tools #android-sdk-platform-tools
+#ncurses5-compat-libs  # only consumer here was the android-sdk build tools; it is a
+#                        from-source ncurses rebuild, so not worth carrying with them gone
+#cachyos-ananicy-rules-git  # ananicy-cpp 1.2.0 is installed and ships its own ruleset
+#rose-pine-hyprcursor
+#facetimehd-dkms-git #facetimehd-data
+#                      # WRONG HARDWARE. facetimehd drives the PCIe Broadcom 1570
+#                        webcam in 2013-2015 Macs. This machine's camera is a USB
+#                        device behind the T2 (apple-bce) already served by uvcvideo —
+#                        /dev/video0 and /dev/video1 exist and work today. The dkms
+#                        module would build against nothing and bind nothing.
+#zsh-syntax-highlighting-git
+#                      # the repo package zsh-syntax-highlighting is already installed
+#                        (via cachyos-zsh-config); the -git build would conflict. Login
+#                        shell here is fish anyway.
+#paccache-hook         # pacman-contrib is installed and already ships paccache.timer,
+#                        currently `disabled`. Just run: systemctl enable --now paccache.timer
+#ferdium-bin           # DROPPED by user 2026-08-08. Hard-depends on
+#                        electron37, which Arch has dropped (repos carry electron and
+#                        electron39-43 only), so yay falls back to the AUR electron37
+#                        package and builds Electron from Chromium source — a multi-hour
+#                        build off a tens-of-GB chromium-mirror clone. Alternatives:
+#                        flatpak install flathub org.ferdium.Ferdium (Electron bundled),
+#                        or ferdium-nightly-bin if its electron dep is current.
+#                        NOTE: upscayl-bin needs electron39, which IS a repo binary — fine.
+# NOTE: `gradle` and `jdk11-openjdk` came in with the repo batch and are already
+# installed. Both are android-adjacent but neither is android-specific — say the word
+# and I'll remove them too.
+
+## ---- SKIPPED: replaced or conflicting ----
+#auto-cpufreq          # CachyOS ships power-profiles-daemon (installed + active,
+#                        intel_pstate/performance). auto-cpufreq refuses to run
+#                        alongside PPD or TLP, so it would fight the distro default.
+#                        thermald is unaffected — it does thermal throttling, not
+#                        frequency policy, and the two are complementary.
+#docker-git            # replaced by plain `docker` from extra (+ buildx, compose).
+#                        The -git build tracks upstream master and rebuilds on every
+#                        yay run for no benefit here.
+#broadcom-wl-dkms      # wifi works via brcmfmac + linux-firmware-broadcom; dkms would fight it
+#grub                  # system boots limine
+#waybar #wofi          # replaced by caelestia-shell
+#hyprpaper             # caelestia manages wallpaper
+#hyprpolkitagent       # polkit-gnome already installed; two agents conflict
+#xdg-desktop-portal-wlr #xdg-desktop-portal-gnome  # xdg-desktop-portal-hyprland + -gtk already present
+#wlroots0.18           # legacy soname, nothing needs it
+
+## ---- SKIPPED: unavailable ----
+#linux-t2 #linux-t2-headers #linux-t2-docs  # replaced by linux-cachyos (T2 modules already load)
+#apple-bcm-firmware    # not in any configured repo; wifi works without it
+#cider                 # no longer in the AUR
+#powerpill             # deleted from the AUR (RPC returns 0 results). Obsolete anyway:
+#                        /etc/pacman.conf already sets ParallelDownloads = 10

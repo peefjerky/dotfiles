@@ -1,0 +1,18 @@
+{
+    "toggles": {
+        "sysmon": {
+            "btop": {
+                "command": [
+                    "kitty",
+                    "--class",
+                    "btop",
+                    "--title",
+                    "btop",
+                    "fish",
+                    "-C",
+                    "exec btop"
+                ]
+            }
+        }
+    }
+}

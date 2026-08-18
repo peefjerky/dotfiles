@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# Extract archives next to themselves. One folder per archive, unwrapped when the
+# archive already had a single root directory (so no foo/foo/ nesting, and no
+# tarbombs spraying the parent). bsdtar handles zip/tar.*/7z/rar/iso, so this
+# needs nothing installed that pacman didn't already pull in.
+set -euo pipefail
+
+fail() {
+    notify-send -a Extract -u critical "Extraction failed" "$1" 2>/dev/null || true
+    echo "extract-here: $1" >&2
+    exit 1
+}
+
+extract() {
+    local archive=$1 dir base name target n=1 inner moved
+    [[ -f $archive ]] || fail "not a file: $archive"
+
+    dir=$(dirname -- "$archive")
+    base=$(basename -- "$archive")
+    name=${base%.*}
+    [[ $name == *.tar ]] && name=${name%.tar}
+    [[ -n $name ]] || name=$base
+
+    target=$dir/$name
+    while [[ -e $target ]]; do target="$dir/$name-$((n++))"; done
+
+    mkdir -p -- "$target"
+    bsdtar -xf "$archive" -C "$target" || {
+        rmdir --ignore-fail-on-non-empty -- "$target"
+        fail "$base"
+    }
+
+    # Single root directory inside? Lift it out and drop the wrapper.
+    shopt -s dotglob nullglob
+    local entries=("$target"/*)
+    shopt -u dotglob nullglob
+    if [[ ${#entries[@]} -eq 1 && -d ${entries[0]} ]]; then
+        inner=${entries[0]}
+        moved=$dir/$(basename -- "$inner")
+        if [[ ! -e $moved ]] && mv -- "$inner" "$moved" && rmdir -- "$target"; then
+            target=$moved
+        fi
+    fi
+
+    printf '%s\n' "$target"
+    notify-send -a Extract "Extracted" "$(basename -- "$target")" 2>/dev/null || true
+}
+
+selftest() {
+    t=$(mktemp -d); trap 'rm -rf "$t"' EXIT
+
+    # Archive with a single root dir -> must NOT end up as pkg/pkg/
+    mkdir -p "$t/src/pkg" && echo hi > "$t/src/pkg/a.txt"
+    ( cd "$t/src" && bsdtar -cf "$t/rooted.zip" --format zip pkg )
+    [[ $(extract "$t/rooted.zip") == "$t/pkg" ]] || { echo "FAIL: rooted target"; exit 1; }
+    [[ -f $t/pkg/a.txt ]] || { echo "FAIL: rooted contents"; exit 1; }
+
+    # Tarbomb (loose files at the root) -> must land in its own folder
+    ( cd "$t/src/pkg" && bsdtar -cf "$t/bomb.zip" --format zip a.txt )
+    [[ $(extract "$t/bomb.zip") == "$t/bomb" ]] || { echo "FAIL: bomb target"; exit 1; }
+    [[ -f $t/bomb/a.txt ]] || { echo "FAIL: bomb contents"; exit 1; }
+
+    # Name already taken -> must not clobber
+    [[ $(extract "$t/bomb.zip") == "$t/bomb-1" ]] || { echo "FAIL: collision"; exit 1; }
+
+    echo "selftest ok"
+}
+
+[[ ${1:-} == --selftest ]] && { selftest; exit 0; }
+for a in "$@"; do extract "$a"; done

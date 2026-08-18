@@ -1,0 +1,8 @@
+# Lets caelestia's sync_papirus_colors() recolour Papirus folders to the
+# current accent. It shells out to `sudo -n papirus-folders`, which fails
+# silently without this rule (theme.py:246-252).
+#
+# Both paths are listed: sudo's secure_path resolves the bare name to
+# /usr/local/bin first, where the hue-matching shim lives, and the shim
+# then execs /usr/bin/papirus-folders directly.
+peefjerky ALL=(root) NOPASSWD: /usr/local/bin/papirus-folders, /usr/bin/papirus-folders

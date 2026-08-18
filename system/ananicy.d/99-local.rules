@@ -1,0 +1,36 @@
+# Local overrides. Loads after 00-default/, later rule wins.
+
+# caelestia shell: NOT a background service. It is desktop UI and must
+# outrank the browser, or the whole shell stutters under a heavy tab.
+{ "name": "qs", "nice": -6, "ioclass": "best-effort", "ionice": 2 }
+
+# Zen ships as Doc-View (-4), which the whole content-process tree inherits.
+# A browser has no business outranking the desktop. Back to neutral.
+{ "name": "zen", "nice": 0 }
+{ "name": "zen-bin", "nice": 0 }
+
+# Thorium ships as Doc-View (-4) too. Same reasoning as Zen.
+{ "name": "thorium", "nice": 0 }
+
+# ── voxtype dictation ────────────────────────────────────────────────────────
+# Load shape: idle at ~0% with the 640 MB Parakeet model resident, then a 1-3 s
+# burst that saturates the machine. ONNX Runtime spawns 15 threads on this 4c/8t
+# part and there is no [parakeet] threads key to cap it (ParakeetConfig has only
+# model / model_type / on_demand_loading / quantized / streaming_*), so the cap
+# has to come from here.
+#
+# nice -4: the burst must finish fast -- latency is the entire point of
+# dictation -- but stays below caelestia's shell at -6 so the desktop keeps
+# drawing. Hyprland is SCHED_RR and out of reach from here regardless.
+#
+# cgroup cpu80: the actual "don't eat the machine" lever. Caps the daemon at 80%
+# of total CPU, leaving ~1 core for the compositor and the OSD during inference.
+{ "name": "voxtype", "nice": -4, "ioclass": "best-effort", "ionice": 4, "sched": "normal", "cgroup": "cpu80" }
+
+# Feeds the OSD visualiser at ~100 Hz. One thread, negligible cost, but it must
+# not be scheduled behind the inference burst or the bars stutter mid-recording.
+# comm is truncated to 15 chars, hence the clipped name.
+{ "name": "voxtype-audio-b", "nice": -5, "ioclass": "best-effort", "ionice": 3 }
+
+# No rule for the OSD itself: it runs as `qs`, so the caelestia shell rule above
+# already covers it.

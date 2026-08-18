@@ -13,7 +13,7 @@ echo ""
 # --------------------------------------------------------
 # User configs (~/.config/)
 # --------------------------------------------------------
-echo "[1/3] Symlinking user configs..."
+echo "[1/4] Symlinking user configs..."
 
 for entry in "$CONFIG_SRC"/*/; do
     name="$(basename "$entry")"
@@ -44,7 +44,7 @@ echo ""
 # --------------------------------------------------------
 # System configs (/etc/, /usr/local/bin/)
 # --------------------------------------------------------
-echo "[2/3] Applying system configs (requires sudo)..."
+echo "[2/4] Applying system configs (requires sudo)..."
 
 SYSTEM_SRC="$DOTFILES/system"
 
@@ -56,33 +56,33 @@ install_file() {
     echo "  -> $dst"
 }
 
-# modprobe.d
-for f in "$SYSTEM_SRC/modprobe.d/"*; do
-    install_file "$f" "/etc/modprobe.d/$(basename "$f")"
-done
+# Copy every file in system/<rel> to /etc/<rel>. Skips silently when the
+# directory does not exist -- an unguarded glob expands to the literal path and
+# aborts the whole script under `set -e`.
+install_dir() {
+    local rel="$1"
+    local dst="${2:-/etc/$rel}"
+    [ -d "$SYSTEM_SRC/$rel" ] || return 0
+    local f
+    for f in "$SYSTEM_SRC/$rel"/*; do
+        [ -f "$f" ] || continue
+        install_file "$f" "$dst/$(basename "$f")"
+    done
+}
 
-# udev rules
-for f in "$SYSTEM_SRC/udev/rules.d/"*; do
-    install_file "$f" "/etc/udev/rules.d/$(basename "$f")"
-done
-sudo udevadm control --reload-rules
+install_dir modprobe.d
+install_dir tiny-dfr
+install_dir ananicy.d
+install_dir polkit-1 /etc/polkit-1/rules.d
 
-# systemd units
-for f in "$SYSTEM_SRC/systemd/system/"*; do
-    install_file "$f" "/etc/systemd/system/$(basename "$f")"
-done
-sudo systemctl daemon-reload
-sudo systemctl enable t2bce-audio.service
+install_dir udev/rules.d
+[ -d "$SYSTEM_SRC/udev/rules.d" ] && sudo udevadm control --reload-rules
 
-# polkit rules
-for f in "$SYSTEM_SRC/polkit-1/"*; do
-    install_file "$f" "/etc/polkit-1/rules.d/$(basename "$f")"
-done
-
-# ananicy
-for f in "$SYSTEM_SRC/ananicy.d/"*; do
-    install_file "$f" "/etc/ananicy.d/$(basename "$f")"
-done
+install_dir systemd/system
+if [ -d "$SYSTEM_SRC/systemd/system" ]; then
+    sudo systemctl daemon-reload
+    sudo systemctl enable t2bce-audio.service
+fi
 
 # scripts
 for f in "$SYSTEM_SRC/scripts/"*; do
@@ -93,10 +93,39 @@ done
 echo ""
 
 # --------------------------------------------------------
+# ~/.local -- scripts and the voxtype OSD override
+# --------------------------------------------------------
+if [ -d "$DOTFILES/local" ]; then
+    echo "[3/4] Installing ~/.local files..."
+    mkdir -p "$HOME/.local/bin" "$HOME/.local/share/applications"
+    for f in "$DOTFILES/local/bin/"*; do
+        [ -f "$f" ] || continue
+        install -m 755 "$f" "$HOME/.local/bin/$(basename "$f")"
+        echo "  -> ~/.local/bin/$(basename "$f")"
+    done
+    for f in "$DOTFILES/local/share/applications/"*; do
+        [ -f "$f" ] || continue
+        install -m 644 "$f" "$HOME/.local/share/applications/$(basename "$f")"
+        echo "  -> ~/.local/share/applications/$(basename "$f")"
+    done
+    # voxtype's OSD tree. `voxtype setup quickshell` overwrites this directory,
+    # so re-run install.sh after a voxtype update to put the overrides back.
+    if [ -d "$DOTFILES/local/share/voxtype/quickshell" ]; then
+        mkdir -p "$HOME/.local/share/voxtype"
+        cp -r "$DOTFILES/local/share/voxtype/quickshell" "$HOME/.local/share/voxtype/"
+        echo "  -> ~/.local/share/voxtype/quickshell"
+    fi
+    update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
+    echo ""
+fi
+
+# --------------------------------------------------------
 # Rebuild initramfs (blacklists need to be baked in)
 # --------------------------------------------------------
-echo "[3/3] Rebuilding initramfs for linux-t2..."
-sudo mkinitcpio -p linux-t2
+echo "[4/4] Rebuilding initramfs (blacklists must be baked in)..."
+# -P does every installed preset. The old `-p linux-t2` was hard-coded and fails
+# outright on this machine, which runs linux-cachyos.
+sudo mkinitcpio -P
 
 echo ""
 echo "Done. Reboot to apply all changes."

@@ -20,17 +20,26 @@ id_ed25519
 config/fish/fish_history
 config/fish/*.bak
 
-# Quickshell generated/runtime files
-config/quickshell/ii/modules/ii/overview/*.bak
-
 # Neovim plugins and state (managed by lazy.nvim / mason)
 config/nvim/lazy-lock.json
 config/nvim/plugin/
 config/nvim/.git/
 
+# mpv: uosc ships ~17 MB of prebuilt binaries per platform. Plugin, not config.
+config/mpv/scripts/
+config/mpv/fonts/
+config/mpv/watch_later/
+
+# caelestia's config dir carries an inert .git (no commits, no remote).
+# Nesting it would make this a broken submodule.
+config/caelestia/.git/
+
 # Large binary / cache directories
 config/btop/themes/.git/
 config/easyeffects/irs/
+
+# Logs
+*.log
 
 # OS noise
 .DS_Store

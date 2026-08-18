@@ -1,0 +1,9 @@
+module voxtype-shared
+
+singleton Theme 1.0 Theme.qml
+singleton Colours 1.0 Colours.qml
+StateReader 1.0 StateReader.qml
+AudioBridge 1.0 AudioBridge.qml
+CAnim 1.0 CAnim.qml
+Anim 1.0 Anim.qml
+MaterialIcon 1.0 MaterialIcon.qml

@@ -2,17 +2,17 @@
 lastLoadedOutputPreset=Laptop
 
 [StreamInputs]
-inputDevice=alsa_input.pci-0000_e6_00.3.pro-input-1
+inputDevice=alsa_input.pci-0000_e6_00.3.BuiltinMic
+visiblePage=pluginsPage
 
 [StreamOutputs]
-mostUsedPresets=Laptop,LoudnessEqualizer,LoudnessCrystalEqualizer-GTK,LoudnessCrystalEqualizer,Dolby Atmos
-outputDevice=bluez_output.41_42_F5_37_43_C3.1
+mostUsedPresets=Laptop
+outputDevice=bluez_output.14_14_7D_E6_74_A9.1
 plugins=gate#0,compressor#0,multiband_compressor#0,equalizer#0,limiter#0
-usedPresets=mbp:1,Laptop:13,Perfect EQ:3,Speaker Sync:1,Dolby Atmos:3,Boosted:2,Bass Enhancing + Perfect EQ:2,Loudness+Autogain:1,LoudnessCrystalEqualizer:3,LoudnessCrystalEqualizer-GTK:4,LoudnessEqualizer:4,LoudnessEqualizer-GTK:2,LoudnessEqualizer-OldGate:2,Bass Boosted:1,Bass Enhancing + Perfect EQ - Low Latency:1,Advanced Auto Gain:1
+usedPresets=Laptop:2
 visiblePage=pluginsPage
-visiblePlugin=equalizer#0
+visiblePlugin=compressor#0
 
 [Window]
-height=953
-visiblePipeWirePage=testSignalsPage
-width=1598
+height=954
+width=744

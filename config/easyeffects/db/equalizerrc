@@ -1,3 +1,25 @@
+[sie][Equalizer#0#left]
+band0Gain=18.57
+band13Gain=16.51
+band14Gain=14.670000000000002
+band15Gain=23.8
+band19Gain=0.15000000000000074
+band1Gain=25.3
+band2Gain=8.21
+band3Gain=-5.039999999999999
+band8Gain=0.12999999999999998
+
+[sie][Equalizer#0#right]
+band0Gain=18.57
+band13Gain=16.51
+band14Gain=14.670000000000002
+band15Gain=23.8
+band19Gain=0.15000000000000074
+band1Gain=25.3
+band2Gain=8.21
+band3Gain=-5.039999999999999
+band8Gain=0.12999999999999998
+
 [soe][Equalizer#0]
 numBands=10
 

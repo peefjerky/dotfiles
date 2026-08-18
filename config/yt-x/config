@@ -31,8 +31,8 @@ CONFIG_LAUNCHER="fzf"
 
 # Enable image/video previews within the selector
 # Options: true, false (Default: false)
-CONFIG_ENABLE_PREVIEW="true"
-CONFIG_ENABLE_PREVIEW_IMAGES="true"
+CONFIG_ENABLE_PREVIEW="false"
+CONFIG_ENABLE_PREVIEW_IMAGES="false"
 
 # The tool used to render previews in the terminal
 # Options: chafa, icat, imgcat (Default: chafa)
@@ -55,6 +55,10 @@ CONFIG_MPV_ARGS=""
 CONFIG_VLC_ARGS=""
 CONFIG_TPLAY_ARGS=""
 
+# Name of the activity to launch on Android. Useful if you are using a fork with a different activity name
+CONFIG_PLAYER_MPV_ANDROID_ACTIVITY_NAME=""
+CONFIG_PLAYER_VLC_ANDROID_ACTIVITY_NAME=""
+
 # Whether to disown the player, process to prevent blocking the UI
 # options: true, false (Default: false)
 CONFIG_DISOWN_PLAYER="false"
@@ -71,7 +75,7 @@ CONFIG_BROWSER=""
 
 # Text editor for manual configuration/metadata editing
 # Options: vim, nano, code ... (Default: $EDITOR or vi)
-CONFIG_EDITOR="nvim"
+CONFIG_EDITOR="vi"
 
 # The terminal to use to execute commands that require a terminal
 CONFIG_TERMINAL_EXEC=""
@@ -80,8 +84,8 @@ CONFIG_TERMINAL_EXEC=""
 CONFIG_NOTIFICATION_DURATION="5"
 
 # Directory where downloads are saved
-# Default: /home/peef/Videos/yt-x
-CONFIG_DOWNLOAD_DIR="/home/peef/Videos/yt-x"
+# Default: /home/peefjerky/Videos/yt-x
+CONFIG_DOWNLOAD_DIR="/home/peefjerky/Videos/yt-x"
 CONFIG_DOWNLOADS_ENUMERATE="false"
 
 # Automatically check for script updates on startup

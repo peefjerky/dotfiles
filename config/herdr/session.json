@@ -2,50 +2,47 @@
   "version": 3,
   "workspaces": [
     {
-      "id": "wV",
+      "id": "wK",
       "custom_name": null,
-      "identity_cwd": "/home/peef/.config/hypr",
+      "identity_cwd": "/home/peefjerky/Downloads/dotfiles",
       "public_pane_numbers": {
         "1": 1,
-        "2": 7
+        "2": 3
       },
-      "next_public_pane_number": 8,
+      "next_public_pane_number": 4,
       "public_tab_numbers": [
-        1
+        1,
+        3
       ],
       "next_public_tab_number": 4,
       "tabs": [
         {
-          "custom_name": null,
+          "custom_name": "Claude",
           "layout": {
-            "Split": {
-              "direction": "Horizontal",
-              "ratio": 0.5,
-              "first": {
-                "Pane": 1
-              },
-              "second": {
-                "Pane": 2
-              }
-            }
+            "Pane": 1
           },
           "panes": {
             "1": {
-              "cwd": "/home/peef/.config/hypr",
-              "agent_session": {
-                "source": "herdr:claude",
-                "agent": "claude",
-                "kind": "id",
-                "value": "e31bfc43-de53-4a86-8c83-c9e9ce330ce0"
-              }
-            },
-            "2": {
-              "cwd": "/home/peef/.config/hypr"
+              "cwd": "/home/peefjerky/Downloads/dotfiles"
             }
           },
           "zoomed": false,
           "focused": 1,
           "root_pane": 1
+        },
+        {
+          "custom_name": "Localservers",
+          "layout": {
+            "Pane": 2
+          },
+          "panes": {
+            "2": {
+              "cwd": "/home/peefjerky/.ssh"
+            }
+          },
+          "zoomed": false,
+          "focused": 2,
+          "root_pane": 2
         }
       ],
       "active_tab": 0
@@ -53,7 +50,7 @@
   ],
   "active": 0,
   "selected": 0,
-  "sidebar_width": 27,
-  "sidebar_section_split": 0.42857143,
+  "sidebar_width": 18,
+  "sidebar_section_split": 0.23404256,
   "collapsed_space_keys": []
 }

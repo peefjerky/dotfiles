@@ -1,0 +1,14 @@
+actions-for-nautilus-git
+apple-fonts
+catt
+cbonsai-git
+hyprshade
+miraclecast-git
+mkchromecast-git
+nicotine-plus-git
+nodejs-mjml
+qt6-avif-image-plugin
+thorium-browser-bin
+ttf-dm-fonts-git
+upscayl-bin
+yt-x-git

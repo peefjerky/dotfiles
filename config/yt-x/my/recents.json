@@ -1,0 +1,38 @@
+{
+  "entries": [
+    {
+      "_type": "url",
+      "ie_key": "Youtube",
+      "id": "-11dLee0dbE",
+      "url": "https://www.youtube.com/watch?v=-11dLee0dbE",
+      "title": "The NEW Ghost Recon: Wildlands Update (not kidding)",
+      "description": "Celebrate 25 years of Ghost Recon with up to 95% off Ghost Recon Wildlands, Ghost Recon Breakpoint, and more! There has ...",
+      "duration": 3177,
+      "channel_id": "UC-ihxmkocezGSm9JcKg1rfw",
+      "channel": "OperatorDrewski",
+      "channel_url": "https://www.youtube.com/channel/UC-ihxmkocezGSm9JcKg1rfw",
+      "uploader": "OperatorDrewski",
+      "uploader_id": "@OperatorDrewski",
+      "uploader_url": "https://www.youtube.com/@OperatorDrewski",
+      "thumbnails": [
+        {
+          "url": "https://i.ytimg.com/vi/-11dLee0dbE/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAET5x9WM6w9PcKI6zJhajw45crnQ",
+          "height": 202,
+          "width": 360
+        },
+        {
+          "url": "https://i.ytimg.com/vi/-11dLee0dbE/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCxS0-XgUeugk5mcmM1YihB74riSg",
+          "height": 404,
+          "width": 720
+        }
+      ],
+      "timestamp": 1786060800,
+      "release_timestamp": null,
+      "availability": null,
+      "view_count": 664357,
+      "live_status": null,
+      "channel_is_verified": true,
+      "__x_forwarded_for_ip": null
+    }
+  ]
+}

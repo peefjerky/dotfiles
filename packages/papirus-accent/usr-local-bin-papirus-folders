@@ -1,0 +1,129 @@
+#!/usr/bin/env python3
+"""Recompute caelestia's Papirus folder colour by hue, then delegate.
+
+caelestia's sync_papirus_colors() picks the colour from raw RGB saturation
+(theme.py:227-239), so anything under 20% saturation collapses to white/grey.
+Most matugen dark-mode primaries are deliberately pale and land there -- a green
+accent at 17% saturation becomes white folders. This matches on Oklab hue
+instead, which is what "green accent -> green folders" actually means.
+
+Lives at /usr/local/bin/papirus-folders, ahead of /usr/bin in sudo's secure_path,
+so caelestia's `sudo -n papirus-folders -C <colour> -u` lands here first. Only the
+-C value is rewritten; every other argument passes through untouched, and any
+failure falls through to the real binary unchanged.
+
+Self-check: papirus-folders --shim-selftest
+"""
+import glob
+import json
+import math
+import os
+import pwd
+import re
+import sys
+
+REAL = "/usr/bin/papirus-folders"
+PLACES = "/usr/share/icons/Papirus/48x48/places"
+SCHEME = ".local/state/caelestia/scheme.json"
+
+# Below this Oklab chroma the accent reads as neutral, so hue carries no signal.
+GREY_CHROMA = 0.04
+NEUTRAL = "grey"
+
+HEX = re.compile(r"#[0-9a-fA-F]{6}")
+
+
+def oklab(hexstr):
+    h = hexstr.lstrip("#")
+    r, g, b = (int(h[i:i + 2], 16) / 255 for i in (0, 2, 4))
+    f = lambda c: c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
+    r, g, b = f(r), f(g), f(b)
+    l = (0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b) ** (1 / 3)
+    m = (0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b) ** (1 / 3)
+    s = (0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b) ** (1 / 3)
+    return (0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s,
+            1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s,
+            0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s)
+
+
+def hue_chroma(hexstr):
+    _, a, b = oklab(hexstr)
+    return math.atan2(b, a), math.hypot(a, b)
+
+
+def palette():
+    """{colour name: representative hex} read from Papirus's own folder SVGs.
+
+    Each carries a few greys for the paper; the most saturated hex is the folder
+    body. Detected the same way papirus-folders detects its own colour list.
+    """
+    out = {}
+    for path in glob.glob(f"{PLACES}/folder-*-documents.svg"):
+        name = re.search(r"folder-(.+)-documents\.svg$", path).group(1)
+        plain = f"{PLACES}/folder-{name}.svg"
+        if not os.path.exists(plain):
+            continue
+        with open(plain) as fh:
+            hexes = set(HEX.findall(fh.read()))
+        if hexes:
+            out[name] = max(hexes, key=lambda h: hue_chroma(h)[1])
+    return out
+
+
+def pick(primary, pal):
+    h0, c0 = hue_chroma(primary)
+    if c0 < GREY_CHROMA:
+        return NEUTRAL
+    best, best_d = None, math.inf
+    for name, hexv in pal.items():
+        h, c = hue_chroma(hexv)
+        if c < GREY_CHROMA:
+            continue  # neutral folder, no hue to compare against
+        d = abs((h - h0 + math.pi) % (2 * math.pi) - math.pi)
+        if d < best_d:
+            best, best_d = name, d
+    return best or NEUTRAL
+
+
+def user_home():
+    """Runs as root under sudo, so $HOME is /root -- resolve the real user."""
+    name = os.environ.get("SUDO_USER")
+    if name:
+        return pwd.getpwnam(name).pw_dir
+    return os.path.expanduser("~")
+
+
+def accent():
+    with open(os.path.join(user_home(), SCHEME)) as fh:
+        return "#" + json.load(fh)["colours"]["primary"]
+
+
+def selftest():
+    pal = palette()
+    assert len(pal) > 10, f"only {len(pal)} colours found -- is Papirus installed?"
+    for name in ("red", "green", "blue", "yellow"):
+        assert pick(pal[name], pal) == name, f"{name} -> {pick(pal[name], pal)}"
+    assert pick("#808080", pal) == NEUTRAL
+    # The case this shim exists for: pale green must not become white.
+    assert pick("#b5cea9", pal) in ("green", "palegreen"), pick("#b5cea9", pal)
+    print(f"{len(pal)} colours")
+    print(f"live accent {accent()} -> {pick(accent(), pal)}")
+    print("ok")
+
+
+def main():
+    args = sys.argv[1:]
+    if "--shim-selftest" in args:
+        return selftest()
+    try:
+        i = args.index("-C")
+        colour = pick(accent(), palette())
+        if colour:
+            args[i + 1] = colour
+    except Exception:
+        pass  # never block the real command
+    os.execv(REAL, [REAL] + args)
+
+
+if __name__ == "__main__":
+    main()

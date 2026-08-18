@@ -1,57 +1,50 @@
-# --- Environment ---
-set -gx XDG_CURRENT_DESKTOP Hyprland
-set -gx EDITOR nvim
-set -gx XCURSOR_SIZE 24
-set -gx JAVA_HOME /usr/lib/jvm/java-11-openjdk
-set -gx SSH_AUTH_SOCK "$XDG_RUNTIME_DIR/ssh-agent.socket"
-set -gx NVM_DIR "$HOME/.nvm"
-fish_add_path ~/.local/bin
-fish_add_path ~/.cargo/bin
-fish_add_path /opt/zen-browser-bin
-
-# --- Homebrew ---
-eval (/home/linuxbrew/.linuxbrew/bin/brew shellenv fish)
-
 if status is-interactive
-    set fish_greeting
+    # Starship custom prompt
+    command -v starship &> /dev/null && starship init fish | source
 
-    # Use starship
-    function starship_transient_prompt_func
-        starship module character
+    # Direnv + Zoxide
+    command -v direnv &> /dev/null && direnv hook fish | source
+    command -v zoxide &> /dev/null && zoxide init fish --cmd cd | source
+
+    # Better ls
+    command -v eza &> /dev/null && alias ls='eza --across -w=40 --icons --group-directories-first -1'
+
+    # Abbrs
+    abbr lg 'lazygit'
+    abbr gd 'git diff'
+    abbr ga 'git add .'
+    abbr gc 'git commit -am'
+    abbr gl 'git log'
+    abbr gs 'git status'
+    abbr gst 'git stash'
+    abbr gsp 'git stash pop'
+    abbr gp 'git push'
+    abbr gpl 'git pull'
+    abbr gsw 'git switch'
+    abbr gsm 'git switch main'
+    abbr gb 'git branch'
+    abbr gbd 'git branch -d'
+    abbr gco 'git checkout'
+    abbr gsh 'git show'
+
+    abbr l 'ls'
+    abbr ll 'ls -l'
+    abbr la 'ls -a'
+    abbr lla 'ls -la'
+
+    # Custom colours
+    cat ~/.local/state/caelestia/sequences.txt 2> /dev/null
+
+    # For jumping between prompts in foot terminal
+    function mark_prompt_start --on-event fish_prompt
+        echo -en "\e]133;A\e\\"
     end
 
-    if test "$TERM" != "linux"
-        starship init fish | source
-        enable_transience
-    end
-
-    # --- dots-hyprland terminal colors ---
-    if test -f ~/.local/state/quickshell/user/generated/terminal/sequences.txt
-        cat ~/.local/state/quickshell/user/generated/terminal/sequences.txt
-    end
-
-    # --- fzf: use fzf.fish plugin if installed, else built-in bindings ---
-    # fzf.fish adds: Ctrl+R history, Ctrl+Alt+F files, Ctrl+Alt+L git log,
-    #                Ctrl+Alt+S git status, Ctrl+Alt+P processes
-    if not functions -q _fzf_search_history
-        fzf --fish | source
-    end
-
-    # --- Zoxide (z dirname, zi for interactive) ---
-    zoxide init fish | source
-
-    # --- Aliases ---
-    alias ls 'eza --color=always --tree -x --icons=always --level=1 --git --long --no-filesize --no-time --no-user'
-    alias nosleep 'systemd-inhibit --what=idle sleep infinity'
-    alias clearcache 'sudo paccache -rk1 && sudo pacman -Rns (pacman -Qdtq) && yay -Sc && yay -Yc'
-    alias pamcan pacman
-    alias q 'qs -c ii'
-
-    # Kitty-specific
-    alias clear "printf '\033[2J\033[3J\033[1;1H'"
-    alias celar "printf '\033[2J\033[3J\033[1;1H'"
-    alias claer "printf '\033[2J\033[3J\033[1;1H'"
-    if test "$TERM" = xterm-kitty
-        alias ssh 'kitten ssh'
-    end
+    # Custom fish config
+    set -q XDG_CONFIG_HOME && set -l cConf $XDG_CONFIG_HOME/caelestia || set -l cConf $HOME/.config/caelestia
+    source $cConf/user-config.fish 2> /dev/null
 end
+zoxide init fish | source
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+set -gx PATH $HOME/.local/bin $PATH

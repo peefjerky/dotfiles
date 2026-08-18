@@ -1,0 +1,90 @@
+{
+    "appearance": {
+        "transparency": {
+            "enabled": false
+        }
+    },
+    "bar": {
+        "workspaces": {
+            "activeIndicator": true,
+            "activeTrail": true,
+            "occupiedBg": true,
+            "shown": 5
+        }
+    },
+    "general": {
+        "apps": {
+            "audio": [
+                "pwvucontrol"
+            ],
+            "explorer": [
+                "thunar"
+            ],
+            "terminal": [
+                "kitty"
+            ]
+        },
+        "idle": {
+            "timeouts": [
+                {
+                    "idleAction": [
+                        "brightnessctl",
+                        "-d",
+                        "appletb_backlight",
+                        "set",
+                        "0"
+                    ],
+                    "inhibitWhenCharging": true,
+                    "respectInhibitors": false,
+                    "returnAction": [
+                        "brightnessctl",
+                        "-d",
+                        "appletb_backlight",
+                        "set",
+                        "2"
+                    ],
+                    "timeout": 30
+                },
+                {
+                    "idleAction": "lock",
+                    "timeout": 300
+                },
+                {
+                    "idleAction": "dpms off",
+                    "returnAction": "dpms on",
+                    "timeout": 600
+                },
+                {
+                    "idleAction": [
+                        "suspendThenHibernate"
+                    ],
+                    "timeout": 900
+                }
+            ]
+        }
+    },
+    "launcher": {
+        "showOnHover": false
+    },
+    "nexus": {
+        "networkRescanInterval": 40000
+    },
+    "services": {
+        "useTwelveHourClock": false
+    },
+    "session": {
+        "commands": {
+            "hibernate": [
+                "hibernate"
+            ]
+        }
+    },
+    "sidebar": {
+        "dragThreshold": 50
+    },
+    "utilities": {
+        "toasts": {
+            "kbLayoutChanged": false
+        }
+    }
+}

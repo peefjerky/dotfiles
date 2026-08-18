@@ -1,0 +1,49 @@
+# /etc/tiny-dfr/config.toml
+#
+# Overrides merged over /usr/share/tiny-dfr/config.toml (that file is the
+# template and must not be edited — a package update overwrites it). Only the
+# keys that differ from the template belong here.
+
+# Show the media/control-strip layer without holding Fn, the way macOS does, so
+# the keyboard-backlight and screen-brightness keys are a single tap. F1-F12
+# move to Fn+tap. Set to false to swap the two layers back.
+MediaLayerDefault = true
+
+# Do NOT set this to true. With adaptive brightness on, tiny-dfr polls the
+# primary display's backlight and repaints the Touch Bar to follow it, which on
+# this machine (MacBookPro16,2, intel_backlight) produced a constant measurable
+# CPU load. Static brightness costs nothing and looks the same in practice.
+AdaptiveBrightness = false
+
+# Touch Bar brightness in the active state, 0-255. Used as the flat value
+# because AdaptiveBrightness is off.
+ActiveBrightness = 128
+
+# The control strip. This is the template's list with the `search` button
+# removed; everything else keeps the stock order.
+#
+# The backlight_low / backlight_high buttons emit IllumDown / IllumUp, which are
+# KEY_KBDILLUMDOWN (229) and KEY_KBDILLUMUP (230) — the same keycodes Hyprland
+# sees as XF86KbdBrightnessDown / XF86KbdBrightnessUp, already bound to the
+# ':white:kbd_backlight' device in ~/.config/caelestia/custom/keybinds.lua. So
+# these drive the keyboard backlight, and SUPER + the same keys drives the Touch
+# Bar's own backlight.
+#
+# NOTE ON BATTERY: tiny-dfr 0.3.2 cannot show one. Its ButtonConfig has exactly
+# four fields — Text, Icon, Action, Stretch — all static. There is no widget,
+# no live data source, and no right-alignment concept; buttons simply divide the
+# strip evenly. "Dynamic function row" in its description refers to switching
+# between the F-key and media layers, not to live content.
+MediaLayerKeys = [
+    { Icon = "brightness_low",  Action = "BrightnessDown" },
+    { Icon = "brightness_high", Action = "BrightnessUp"   },
+    { Icon = "mic_off",         Action = "MicMute"        },
+    { Icon = "backlight_low",   Action = "IllumDown"      },
+    { Icon = "backlight_high",  Action = "IllumUp"        },
+    { Icon = "fast_rewind",     Action = "PreviousSong"   },
+    { Icon = "play_pause",      Action = "PlayPause"      },
+    { Icon = "fast_forward",    Action = "NextSong"       },
+    { Icon = "volume_off",      Action = "Mute"           },
+    { Icon = "volume_down",     Action = "VolumeDown"     },
+    { Icon = "volume_up",       Action = "VolumeUp"       }
+]
