@@ -23,14 +23,18 @@
 # dictation -- but stays below caelestia's shell at -6 so the desktop keeps
 # drawing. Hyprland is SCHED_RR and out of reach from here regardless.
 #
-# cgroup cpu80: the actual "don't eat the machine" lever. Caps the daemon at 80%
-# of total CPU, leaving ~1 core for the compositor and the OSD during inference.
-{ "name": "voxtype", "nice": -4, "ioclass": "best-effort", "ionice": 4, "sched": "normal", "cgroup": "cpu80" }
+# The CPU cap is NOT set here. ananicy enforces a cgroup by moving the process
+# out of its systemd unit cgroup, which permanently freezes systemd's accounting
+# for the service. It lives in ~/.config/systemd/user/voxtype.service.d/
+# cpu-quota.conf as CPUQuota=640% (systemd counts percent-of-one-CPU, so 640%
+# on 8 logical CPUs is the same 6.4-core cap ananicy's cpu80 produced).
+{ "name": "voxtype", "nice": -4, "ioclass": "best-effort", "ionice": 4, "sched": "normal" }
 
 # Feeds the OSD visualiser at ~100 Hz. One thread, negligible cost, but it must
 # not be scheduled behind the inference burst or the bars stutter mid-recording.
-# comm is truncated to 15 chars, hence the clipped name.
-{ "name": "voxtype-audio-b", "nice": -5, "ioclass": "best-effort", "ionice": 3 }
+# ananicy matches the full name, not the 15-char comm -- the truncated form
+# silently never matched and the bridge stayed at nice 0.
+{ "name": "voxtype-audio-bridge", "nice": -5, "ioclass": "best-effort", "ionice": 3 }
 
 # No rule for the OSD itself: it runs as `qs`, so the caelestia shell rule above
 # already covers it.
