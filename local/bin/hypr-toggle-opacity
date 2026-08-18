@@ -17,6 +17,10 @@
 # the rules say", which is how the OFF state restores 0.95 (or the terminal's
 # opaque) rather than hardcoding a number.
 #
+# Both `opacity` (focused) and `opacity_inactive` are set: setting only the
+# first left the window dropping back to 0.95 the moment it lost focus, which
+# defeats the point when you tab away to compare something.
+#
 # The state marker is our own tag, deliberately NOT "opaque": that name is
 # caelestia's and is rule-applied on some windows, which is the bug above.
 #
@@ -33,11 +37,15 @@ tags=$(hyprctl activewindow -j | tr -d ' \n' | grep -o '"tags":\[[^]]*\]' || tru
 
 case "$tags" in
     *"$TAG"*)
-        hyprctl dispatch 'hl.dsp.window.set_prop({ prop = "opacity", value = "-1" })' >/dev/null
+        for p in opacity opacity_inactive; do
+            hyprctl dispatch "hl.dsp.window.set_prop({ prop = \"$p\", value = \"-1\" })" >/dev/null
+        done
         hyprctl dispatch "hl.dsp.window.tag({ tag = \"-$TAG\" })" >/dev/null
         ;;
     *)
-        hyprctl dispatch "hl.dsp.window.set_prop({ prop = \"opacity\", value = $LEVEL })" >/dev/null
+        for p in opacity opacity_inactive; do
+            hyprctl dispatch "hl.dsp.window.set_prop({ prop = \"$p\", value = $LEVEL })" >/dev/null
+        done
         hyprctl dispatch "hl.dsp.window.tag({ tag = \"+$TAG\" })" >/dev/null
         ;;
 esac
