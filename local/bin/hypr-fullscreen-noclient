@@ -1,0 +1,21 @@
+#!/bin/sh
+# Toggle internal-only fullscreen on the active window.
+#
+# hl.dsp.window.fullscreen_state SETS a state, it does not toggle -- pressing the
+# bind repeatedly just re-asserts fullscreen and there is no way back out with
+# the same key. Hyprland's own -1 means "leave unchanged", not "flip". So the
+# toggle has to live here.
+#
+# internal = 2 fills the whole monitor; client = 0 means the app is never told,
+# so browsers and video players keep their normal UI instead of switching to
+# their own fullscreen chrome. That is the whole point of this bind, and what
+# distinguishes it from SUPER+F.
+set -eu
+
+state=$(hyprctl activewindow -j | grep -o '"fullscreen": *[0-9]*' | grep -o '[0-9]*$' || echo 0)
+
+if [ "${state:-0}" = "0" ]; then
+    hyprctl dispatch 'hl.dsp.window.fullscreen_state({ internal = 2, client = 0 })' >/dev/null
+else
+    hyprctl dispatch 'hl.dsp.window.fullscreen_state({ internal = 0, client = 0 })' >/dev/null
+fi

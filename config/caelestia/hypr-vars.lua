@@ -60,10 +60,17 @@ return {
     -- binding, so it moves to SUPER+ALT+P (free; SUPER+P is pin-window).
     kbWindowPip           = "SUPER + ALT + P",
 
-    -- SUPER+ALT+F is wanted for pseudo-fullscreen (see custom/keybinds.lua), so
-    -- caelestia's bordered/maximized fullscreen moves to SUPER+SHIFT+F, which was
-    -- free. Real fullscreen stays on SUPER+F (kbWindowFullscreen), untouched.
-    kbWindowBorderedFullscreen = "SUPER + SHIFT + F",
+    -- SUPER+ALT+F is wanted for pseudo-fullscreen (see custom/keybinds.lua).
+    --
+    -- Caelestia's bordered/maximized fullscreen is PARKED here rather than given
+    -- a real combo: under the scrolling layout with fullscreen_on_one_column,
+    -- "maximized" applies gaps_out a second time on top of the gap a lone column
+    -- already has, so it SHRINKS the window instead of growing it -- measured
+    -- 1499x954 -> 1479x934, exactly 10px per side. SUPER+SHIFT+F is rebound in
+    -- custom/keybinds.lua to internal-only fullscreen instead, which is what the
+    -- combo was actually wanted for. Move this back to a real combo if a future
+    -- layout makes "maximized" behave.
+    kbWindowBorderedFullscreen = "SUPER + SHIFT + ALT + CTRL + F",
 
     -- 4-finger-down sleep gesture. Caelestia's default is
     -- `systemctl suspend-then-hibernate`, which cannot work here: swap is
