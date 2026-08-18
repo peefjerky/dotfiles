@@ -79,3 +79,20 @@ hl.config({
         }
     }
 })
+
+-- Window alpha transitions (SUPER+SHIFT+T, and any rule-driven opacity change).
+--
+-- `fadeSwitch` is the leaf Hyprland uses when a window's alpha goal changes,
+-- as opposed to `fadeIn`/`fadeOut`, which only cover a window appearing or
+-- disappearing. Caelestia configures the whole fade family EXCEPT this one, so
+-- toggling the "opaque" tag snapped between 0.95 and 1.0 with no transition.
+-- Verified it is a real leaf: `hl.animation` errors with "no such animation
+-- leaf" on a bogus name and returns ok for this one.
+--
+-- Hyprland's `speed` is a DURATION in ds (1 = 100ms), so higher is slower --
+-- caelestia's fadeLayersIn at 0.5 is 50ms, its fade at 6 is 600ms. 8 = 800ms,
+-- longer than any of them on purpose: the alpha delta here is only 0.05
+-- (windowOpacity 0.95 -> 1.0), and across a change that small a short fade is
+-- indistinguishable from a snap. The duration is doing the work the contrast
+-- cannot.
+hl.animation({ leaf = "fadeSwitch", enabled = true, speed = 8, bezier = "standard" })

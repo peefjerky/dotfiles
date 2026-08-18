@@ -3,24 +3,20 @@
 #
 # Caelestia already drives opacity off a window tag: hyprland/rules.lua:16-22
 # defines create_tag("opaque", ...) as a window_rule matching { tag = "opaque" },
-# and windowOpacity (0.95) is applied to everything else. So this does not need
-# its own rule or any alpha juggling -- it just flips the tag and lets the
-# existing rule do the work.
+# and windowOpacity (0.95) applies to everything else. So this needs no rule of
+# its own -- it flips the tag and lets the existing rule do the work.
+#
+# Deliberately no python: the first version parsed the JSON with `python3 -c`,
+# and interpreter startup alone was 15 ms of the script's 32 ms, which read as a
+# lag between the keypress and the fade starting. Pure shell is ~4 ms.
 #
 # The trailing "*" on a tag means it was applied by a rule rather than by hand
-# (kitty gets one from custom/rules.lua). Match on the bare name so both kinds
-# are recognised.
+# (kitty gets one from custom/rules.lua), so match the bare name to catch both.
 set -eu
 
-if hyprctl activewindow -j | python3 -c '
-import json, sys
-try:
-    tags = json.load(sys.stdin).get("tags") or []
-except Exception:
-    sys.exit(2)
-sys.exit(0 if any(t.rstrip("*") == "opaque" for t in tags) else 1)
-'; then
-    hyprctl dispatch 'hl.dsp.window.tag({ tag = "-opaque" })' >/dev/null
-else
-    hyprctl dispatch 'hl.dsp.window.tag({ tag = "+opaque" })' >/dev/null
-fi
+tags=$(hyprctl activewindow -j | tr -d ' \n' | grep -o '"tags":\[[^]]*\]' || true)
+
+case "$tags" in
+    *opaque*) hyprctl dispatch 'hl.dsp.window.tag({ tag = "-opaque" })' >/dev/null ;;
+    *)        hyprctl dispatch 'hl.dsp.window.tag({ tag = "+opaque" })' >/dev/null ;;
+esac
