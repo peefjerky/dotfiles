@@ -1,22 +1,38 @@
 #!/bin/sh
-# Toggle the focused window's transparency.
+# Toggle the focused window between its normal opacity and a clearly
+# transparent one.
 #
-# Caelestia already drives opacity off a window tag: hyprland/rules.lua:16-22
-# defines create_tag("opaque", ...) as a window_rule matching { tag = "opaque" },
-# and windowOpacity (0.95) applies to everything else. So this needs no rule of
-# its own -- it flips the tag and lets the existing rule do the work.
+# WHY NOT THE "opaque" TAG (the first version): caelestia keys opacity off that
+# tag, but custom/rules.lua tags the terminal with it BY CLASS. A rule-applied
+# tag shows as "opaque*" and cannot be removed by hand, so on kitty -- the most
+# likely window to try this on -- the toggle silently did nothing.
 #
-# Deliberately no python: the first version parsed the JSON with `python3 -c`,
-# and interpreter startup alone was 15 ms of the script's 32 ms, which read as a
-# lag between the keypress and the fade starting. Pure shell is ~4 ms.
+# setprop overrides window rules, so it works on every window including the
+# terminal. `opacity` is the current prop name; `alpha` was renamed in 0.53+ and
+# now errors with "Invalid prop name". Value -1 means "unset, revert to whatever
+# the rules say", which is how the OFF state restores 0.95 (or the terminal's
+# opaque) rather than hardcoding a number.
 #
-# The trailing "*" on a tag means it was applied by a rule rather than by hand
-# (kitty gets one from custom/rules.lua), so match the bare name to catch both.
+# The state marker is our own tag, deliberately NOT "opaque": that name is
+# caelestia's and is rule-applied on some windows, which is the bug above.
+#
+# 0.80 rather than something near 0.95 on purpose -- the old toggle moved 0.05,
+# and across a delta that small no animation duration is distinguishable from
+# an instant change.
 set -eu
+
+TAG=xparent
+LEVEL=0.80
 
 tags=$(hyprctl activewindow -j | tr -d ' \n' | grep -o '"tags":\[[^]]*\]' || true)
 
 case "$tags" in
-    *opaque*) hyprctl dispatch 'hl.dsp.window.tag({ tag = "-opaque" })' >/dev/null ;;
-    *)        hyprctl dispatch 'hl.dsp.window.tag({ tag = "+opaque" })' >/dev/null ;;
+    *"$TAG"*)
+        hyprctl dispatch 'hl.dsp.window.set_prop({ prop = "opacity", value = "-1" })' >/dev/null
+        hyprctl dispatch "hl.dsp.window.tag({ tag = \"-$TAG\" })" >/dev/null
+        ;;
+    *)
+        hyprctl dispatch "hl.dsp.window.set_prop({ prop = \"opacity\", value = $LEVEL })" >/dev/null
+        hyprctl dispatch "hl.dsp.window.tag({ tag = \"+$TAG\" })" >/dev/null
+        ;;
 esac
