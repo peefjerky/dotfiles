@@ -32,7 +32,11 @@ PanelWindow {
     readonly property bool active: daemonState !== "idle" && daemonState !== ""
     readonly property bool listening: daemonState === "recording" || daemonState === "streaming"
 
-    visible: active
+    // Stays mapped until the exit animation finishes -- `visible: active` alone
+    // would unmap the layer surface the instant recording stops and the fade-out
+    // would never render. Caelestia's toasts solve the same problem with
+    // modelData.lock()/unlock() (Toasts.qml:107, :118).
+    visible: active || card.opacity > 0.01
     anchors {
         top: true
         bottom: true
@@ -160,12 +164,14 @@ PanelWindow {
         Behavior on color { VT.CAnim {} }
         Behavior on border.color { VT.CAnim {} }
 
-        transform: Translate {
-            y: panel.active ? 0 : card.implicitHeight + card.anchors.bottomMargin
-            Behavior on y { VT.Anim { type: VT.Anim.DefaultSpatial } }
-        }
+        // Entry/exit copied from caelestia's toasts (Toasts.qml:80-81, 105-130):
+        // opacity and scale together, 0 -> 1 in, and out to opacity 0 / scale 0.7.
+        // Not a slide -- the toasts do not translate, so neither does this.
         opacity: panel.active ? 1 : 0
+        scale: panel.active ? 1 : 0.7
+
         Behavior on opacity { VT.Anim { type: VT.Anim.DefaultEffects } }
+        Behavior on scale { VT.Anim {} }
 
         RowLayout {
             id: layout

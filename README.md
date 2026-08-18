@@ -97,6 +97,15 @@ it. All customisation goes through the two extension points caelestia provides:
                                       on *every* scheme change. This is how
                                       non-caelestia apps get matugen colours.
 
+### Shell customisation
+
+`config/fish/` **is** a caelestia dots target -- `caelestia update` overwrites it.
+Personal fish config belongs in `config/caelestia/user-config.fish`, which
+caelestia's own `config.fish` sources last and never overwrites.
+
+(`~/.config/hypr/` is a dots target too, for the same reason `hypr-user.lua` and
+`hypr-vars.lua` live under `caelestia/`.)
+
 ### Templates
 
 `caelestia/utils/theme.py: apply_user_templates()` renders every file in
@@ -209,6 +218,20 @@ wrong on this machine:
 `install.sh` symlinks `config/` entries into `~/.config/` and applies `system/`
 files with sudo. It skips anything that already exists and is not a symlink, so
 back up first.
+
+### apply-system.sh
+
+    bash apply-system.sh
+
+**Run this after changing anything under `system/`.** It is the root-owned half
+of `install.sh` on its own -- modprobe blacklists, tiny-dfr, ananicy rules, udev,
+systemd units, `system/scripts/` into `/usr/local/bin`, and the pacman hooks.
+`install.sh` calls it rather than duplicating the logic.
+
+The pacman hook it installs (`95-voxtype-osd.hook`) is what keeps the themed
+voxtype OSD alive: on every `voxtype-bin` upgrade it re-runs
+`voxtype setup quickshell` to pull upstream's new QML, overlays this repo's
+`local/share/voxtype/quickshell/` on top, and restarts the daemon.
 
 ### Packages
 

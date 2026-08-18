@@ -1,0 +1,32 @@
+#!/bin/sh
+# Re-apply the caelestia-themed voxtype OSD after a voxtype upgrade.
+#
+# The package never writes to ~/.local, so an upgrade alone does not clobber the
+# overrides -- but `voxtype setup quickshell` does, and upstream ships new QML
+# files between versions that our tree would otherwise never pick up. So this
+# does both, in order:
+#
+#   1. `voxtype setup quickshell` -- pull the new upstream tree into ~/.local
+#   2. overlay the repo's files on top -- Theme.qml, Colours.qml, MaterialIcon,
+#      CAnim/Anim, OsdSurface.qml, and the qmldir that registers them
+#
+# Overlaying rather than replacing is deliberate: a wholesale copy would drop
+# any file upstream added in the new version.
+set -eu
+
+USER_NAME=peefjerky
+REPO=/home/peefjerky/Downloads/dotfiles
+SRC="$REPO/local/share/voxtype/quickshell"
+DST="/home/$USER_NAME/.local/share/voxtype/quickshell"
+
+[ -d "$SRC" ] || { echo "voxtype-osd-restore: no repo copy at $SRC, skipping" >&2; exit 0; }
+
+runuser -u "$USER_NAME" -- voxtype setup quickshell >/dev/null 2>&1 || true
+runuser -u "$USER_NAME" -- mkdir -p "$DST"
+runuser -u "$USER_NAME" -- cp -r "$SRC/." "$DST/"
+echo "voxtype-osd-restore: re-applied caelestia theming to $DST"
+
+# Reload so the running OSD picks it up. Fails harmlessly if no session.
+runuser -u "$USER_NAME" -- \
+    env XDG_RUNTIME_DIR="/run/user/$(id -u "$USER_NAME")" \
+    systemctl --user restart voxtype >/dev/null 2>&1 || true

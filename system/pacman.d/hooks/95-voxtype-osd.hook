@@ -1,0 +1,11 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = voxtype-bin
+Target = voxtype
+
+[Action]
+Description = Re-applying caelestia theming to the voxtype OSD...
+When = PostTransaction
+Exec = /usr/local/bin/voxtype-osd-restore
