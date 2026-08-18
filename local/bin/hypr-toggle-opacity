@@ -1,6 +1,10 @@
 #!/bin/sh
-# Toggle the focused window between its normal opacity and a clearly
-# transparent one.
+# Force the focused window fully opaque, and back.
+#
+# The point is windows that are transparent by default -- zen sits at
+# windowOpacity 0.95 -- being made solid on demand for reading or screenshots.
+# It is NOT for making things transparent: the terminal is deliberately opaque
+# via custom/rules.lua and pressing this on it is a no-op, which is correct.
 #
 # WHY NOT THE "opaque" TAG (the first version): caelestia keys opacity off that
 # tag, but custom/rules.lua tags the terminal with it BY CLASS. A rule-applied
@@ -16,13 +20,14 @@
 # The state marker is our own tag, deliberately NOT "opaque": that name is
 # caelestia's and is rule-applied on some windows, which is the bug above.
 #
-# 0.80 rather than something near 0.95 on purpose -- the old toggle moved 0.05,
-# and across a delta that small no animation duration is distinguishable from
-# an instant change.
+# NOTE ON THE ANIMATION: the travel here is only 0.95 -> 1.0. That is inherent
+# to the goal -- "make this solid" has nowhere further to go -- so the fade is
+# near-imperceptible no matter what fadeSwitch is set to. Widening it would mean
+# lowering windowOpacity globally, which is a look change nobody asked for.
 set -eu
 
-TAG=xparent
-LEVEL=0.80
+TAG=forceopaque
+LEVEL=1.0
 
 tags=$(hyprctl activewindow -j | tr -d ' \n' | grep -o '"tags":\[[^]]*\]' || true)
 
