@@ -207,3 +207,16 @@ hl.bind("F9", hl.dsp.exec_cmd("voxtype record stop"),
 -- bind again just re-asserts fullscreen, with no way back out on the same key.
 hl.bind("SUPER + SHIFT + F", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.local/bin/hypr-fullscreen-noclient"),
     { description = "Window: Toggle fullscreen without notifying the client" })
+
+--------------------------------------------------------------------------------
+-- Transparency
+--------------------------------------------------------------------------------
+
+-- SUPER+SHIFT+T: toggle the focused window between opaque and windowOpacity.
+--
+-- No new window rule: caelestia already keys opacity off the "opaque" tag
+-- (hyprland/rules.lua:16-22 create_tag, :25 opaque_tag), and custom/rules.lua
+-- tags the configured terminal with it. The script just flips that tag, so this
+-- stays correct if caelestia changes what the tag does.
+hl.bind("SUPER + SHIFT + T", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.local/bin/hypr-toggle-opacity"),
+    { description = "Window: Toggle transparency" })
