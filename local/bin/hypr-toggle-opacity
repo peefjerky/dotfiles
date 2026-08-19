@@ -1,51 +1,32 @@
 #!/bin/sh
-# Force the focused window fully opaque, and back.
+# Toggle the focused window between its normal opacity and fully opaque.
 #
-# The point is windows that are transparent by default -- zen sits at
-# windowOpacity 0.95 -- being made solid on demand for reading or screenshots.
-# It is NOT for making things transparent: the terminal is deliberately opaque
-# via custom/rules.lua and pressing this on it is a no-op, which is correct.
+# Uses Hyprland's dedicated boolean prop `opaque`, not `opacity`. That matters:
+# `opacity` takes a float and is the same knob caelestia's windowOpacity rule
+# drives, so setting it fights the rule and a wrong value blanks the window.
+# `opaque` is a flag -- 1 forces solid, 0 restores whatever the rules say -- so
+# there is no value to get wrong and nothing to reset numerically.
+# (The Lua binding wants a number: value = true is rejected, value = 1 is not.)
 #
-# WHY NOT THE "opaque" TAG (the first version): caelestia keys opacity off that
-# tag, but custom/rules.lua tags the terminal with it BY CLASS. A rule-applied
-# tag shows as "opaque*" and cannot be removed by hand, so on kitty -- the most
-# likely window to try this on -- the toggle silently did nothing.
+# Not the "opaque" TAG: caelestia rule-tags the terminal with that by class, and
+# a rule-applied tag cannot be removed by hand, so the toggle was a no-op there.
+# State lives on our own `forceopaque` tag instead.
 #
-# setprop overrides window rules, so it works on every window including the
-# terminal. `opacity` is the current prop name; `alpha` was renamed in 0.53+ and
-# now errors with "Invalid prop name". Value -1 means "unset, revert to whatever
-# the rules say", which is how the OFF state restores 0.95 (or the terminal's
-# opaque) rather than hardcoding a number.
-#
-# Both `opacity` (focused) and `opacity_inactive` are set: setting only the
-# first left the window dropping back to 0.95 the moment it lost focus, which
-# defeats the point when you tab away to compare something.
-#
-# The state marker is our own tag, deliberately NOT "opaque": that name is
-# caelestia's and is rule-applied on some windows, which is the bug above.
-#
-# NOTE ON THE ANIMATION: the travel here is only 0.95 -> 1.0. That is inherent
-# to the goal -- "make this solid" has nowhere further to go -- so the fade is
-# near-imperceptible no matter what fadeSwitch is set to. Widening it would mean
-# lowering windowOpacity globally, which is a look change nobody asked for.
+# Terminal is deliberately opaque already via custom/rules.lua; pressing this
+# there does nothing, which is correct.
 set -eu
 
 TAG=forceopaque
-LEVEL=1.0
 
 tags=$(hyprctl activewindow -j | tr -d ' \n' | grep -o '"tags":\[[^]]*\]' || true)
 
 case "$tags" in
     *"$TAG"*)
-        for p in opacity opacity_inactive; do
-            hyprctl dispatch "hl.dsp.window.set_prop({ prop = \"$p\", value = \"-1\" })" >/dev/null
-        done
+        hyprctl dispatch 'hl.dsp.window.set_prop({ prop = "opaque", value = 0 })' >/dev/null
         hyprctl dispatch "hl.dsp.window.tag({ tag = \"-$TAG\" })" >/dev/null
         ;;
     *)
-        for p in opacity opacity_inactive; do
-            hyprctl dispatch "hl.dsp.window.set_prop({ prop = \"$p\", value = $LEVEL })" >/dev/null
-        done
+        hyprctl dispatch 'hl.dsp.window.set_prop({ prop = "opaque", value = 1 })' >/dev/null
         hyprctl dispatch "hl.dsp.window.tag({ tag = \"+$TAG\" })" >/dev/null
         ;;
 esac
