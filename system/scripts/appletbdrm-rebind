@@ -1,0 +1,47 @@
+#!/bin/sh
+# appletbdrm-rebind -- retry the Touch Bar DRM probe when it times out at boot.
+#
+# On some boots appletbdrm races apple_bce's virtual USB HCI and its probe dies:
+#
+#     appletbdrm 5-6:2.1: [drm] *ERROR* Failed to send message (-110)
+#     appletbdrm 5-6:2.1: probe with driver appletbdrm failed with error -110
+#
+# No DRM card gets created, so udev never tags dev-tiny_dfr_display.device, so
+# tiny-dfr.service -- which BindsTo= that device -- is cancelled after 90s and
+# the Touch Bar stays dark. Simply writing the interface name back to the
+# driver's bind file fixes it; the retry has always succeeded first try.
+#
+# Runs well inside that 90s window, so tiny-dfr then starts normally. Exits 0
+# no matter what: nothing here should ever hold up a boot.
+set -u
+
+DRV=/sys/bus/usb/drivers/appletbdrm
+TOUCHBAR=8302           # Apple "Touch Bar Display", vendor 05ac
+
+i=0
+while [ "$i" -lt 30 ]; do
+    [ -d "$DRV" ] || modprobe appletbdrm 2>/dev/null
+
+    # Bound already? The driver dir holds one symlink per interface it owns.
+    for b in "$DRV"/*:*; do
+        [ -e "$b" ] && exit 0
+    done
+
+    # Offer it every unclaimed interface of the Touch Bar. A wrong one just
+    # returns -ENODEV -- the id table decides, not us -- so no need to guess
+    # which interface number the bce HCI handed out this boot.
+    for f in /sys/bus/usb/devices/*/idProduct; do
+        [ "$(cat "$f" 2>/dev/null)" = "$TOUCHBAR" ] || continue
+        dev=${f%/idProduct}
+        for n in "$dev":*; do
+            [ -e "$n" ] || continue
+            [ -e "$n/driver" ] && continue
+            echo "${n##*/}" > "$DRV/bind" 2>/dev/null
+        done
+    done
+
+    i=$((i + 1))
+    sleep 1
+done
+
+exit 0

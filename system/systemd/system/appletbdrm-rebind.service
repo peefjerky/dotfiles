@@ -1,0 +1,11 @@
+[Unit]
+Description=Retry the Touch Bar DRM bind when appletbdrm's probe times out
+Documentation=file:///usr/local/bin/appletbdrm-rebind
+Before=tiny-dfr.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/appletbdrm-rebind
+
+[Install]
+WantedBy=multi-user.target

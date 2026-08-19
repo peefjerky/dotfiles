@@ -13,7 +13,7 @@
 #   pacman.d/hooks/ Re-applies the themed voxtype OSD after a voxtype upgrade
 #   polkit-1/       Power-management rules, if present
 #   udev/rules.d/   T2 audio wake rule
-#   systemd/system/ t2bce-audio.service
+#   systemd/system/ t2bce-audio.service, appletbdrm-rebind.service
 #   scripts/        -> /usr/local/bin (what the pacman hook calls)
 set -e
 
@@ -59,7 +59,7 @@ install_dir udev/rules.d
 install_dir systemd/system
 if [ -d "$SYSTEM_SRC/systemd/system" ]; then
     sudo systemctl daemon-reload
-    sudo systemctl enable t2bce-audio.service
+    sudo systemctl enable t2bce-audio.service appletbdrm-rebind.service
 fi
 
 # scripts

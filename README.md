@@ -166,6 +166,23 @@ expose the Speaker/Codec subdevices before `t2bce_audio` probes:
   the one broken step. `packages/tiny-dfr-t2/` rebuilds tiny-dfr with it set to
   2, so "dim" is simply max: no flicker, 60s power-off untouched.
 
+- **The bar is dark after some boots.** `appletbdrm` races `apple_bce`'s virtual
+  USB HCI and its probe times out:
+
+      appletbdrm 5-6:2.1: [drm] *ERROR* Failed to send message (-110)
+      appletbdrm 5-6:2.1: probe with driver appletbdrm failed with error -110
+
+  No DRM card is created, so udev never tags `dev-tiny_dfr_display.device`, so
+  `tiny-dfr.service` -- which `BindsTo=` it -- is cancelled 90s later. Nothing is
+  wrong with tiny-dfr; it was never allowed to start. `appletbdrm-rebind.service`
+  writes the interface name back to the driver's `bind` file inside that window;
+  the retry succeeds. To fix a live session by hand:
+
+      echo 5-6:2.1 | sudo tee /sys/bus/usb/drivers/appletbdrm/bind
+      sudo systemctl start tiny-dfr
+
+  Never `unbind` the USB *device* -- that leaves the Touch Bar dead until reboot.
+
 ### Suspend and hibernate
 
 Suspend works **only through systemd** (`systemctl suspend`). `rtcwake -m mem`
