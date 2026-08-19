@@ -1,0 +1,102 @@
+# Based on the CachyOS tiny-dfr PKGBUILD by Peter Jung <ptr1337@cachyos.org>.
+#
+# WHY THIS EXISTS
+#
+# On Intel T2 Macs, hid_appletb_bl exposes exactly three backlight steps:
+# 0 = off, 1 = dim, 2 = max. Level 1 is PWM'd and visibly flickers.
+#
+# tiny-dfr dims the Touch Bar itself, on hardcoded constants with no config
+# key for any of them (src/backlight.rs, unchanged on master):
+#
+#   const BRIGHTNESS_DIM_TIMEOUT: i32 = TIMEOUT_MS * 3;   // 30s -> dim
+#   const BRIGHTNESS_OFF_TIMEOUT: i32 = TIMEOUT_MS * 6;   // 60s -> off
+#   const DIMMED_BRIGHTNESS: u32 = 1;                     // <- the flickering level
+#
+# `DIMMED_BRIGHTNESS = 1` is correct on Apple Silicon, where display-pipe is a
+# 0-255 backlight and 1 is genuinely dim. On Intel T2 it selects the one broken
+# step. This build sets it to 2, so the "dim" state is simply max: no flicker,
+# and the 60s power-off is untouched.
+#
+# The kernel-side `hid_appletb_kbd autodim=N` does NOT fix this -- that only
+# disables the DRIVER's dim timer. Verified: autodim reads N while tiny-dfr
+# still drove the bar 1 -> 0 on idle.
+#
+# Separate pkgname with provides/conflicts so a `pacman -Syu` cannot silently
+# replace it with the unpatched build.
+
+_upstream=tiny-dfr
+pkgname=tiny-dfr-t2
+pkgver=0.3.2
+pkgrel=1
+provides=('tiny-dfr')
+conflicts=('tiny-dfr')
+pkgdesc="tiny-dfr patched for Intel T2: dim level 2 instead of the PWM'd level 1"
+arch=('x86_64')
+url="https://github.com/AsahiLinux/tiny-dfr"
+license=(MIT and Apache-2.0)
+depends=(
+  cairo
+  fontconfig
+  freetype2
+  libinput
+  librsvg
+  systemd
+)
+makedepends=(
+  cargo
+  clang
+  lld
+  llvm
+  pkg-config
+)
+source=("${_upstream}-${pkgver}.tar.gz::https://github.com/AsahiLinux/tiny-dfr/archive/refs/tags/v${pkgver}.tar.gz")
+b2sums=('30d3ce80a6319811c4ba632f2e9cd0cb90b1f633e910b109022345eea2231208e935ac2b2b53ab60e93353e7f87f5c2320d2f2a0ceaf119b8f0f72126cbb16b7')
+
+prepare() {
+  cd "${_upstream}-${pkgver}"
+
+  # The one-line fix. Fails loudly if upstream renames or retunes the constant,
+  # rather than silently building an unpatched binary.
+  grep -q 'const DIMMED_BRIGHTNESS: u32 = 1;' src/backlight.rs
+  sed -i 's/const DIMMED_BRIGHTNESS: u32 = 1;/const DIMMED_BRIGHTNESS: u32 = 2;/' src/backlight.rs
+
+  cargo fetch --locked --target "${CARCH}-unknown-linux-gnu"
+}
+
+build() {
+  cd "${_upstream}-${pkgver}"
+
+  export AR=llvm-ar
+  export CC=clang
+  export CXX=clang++
+  export NM=llvm-nm
+  export RANLIB=llvm-ranlib
+
+  export RUSTFLAGS="-Cembed-bitcode -C opt-level=3 -Ccodegen-units=1 -Clinker=clang -C link-arg=-flto -Clink-arg=-fuse-ld=/usr/bin/ld.lld"
+  cargo build --release --frozen
+}
+
+package() {
+  cd "${_upstream}-${pkgver}"
+
+  install -Dm755 "target/release/tiny-dfr" "${pkgdir}/usr/bin/tiny-dfr"
+
+  install -Dm644 "etc/systemd/system/tiny-dfr.service" \
+    "${pkgdir}/usr/lib/systemd/system/tiny-dfr.service"
+  install -Dm644 "etc/systemd/system/systemd-backlight@backlight:228200000.display-pipe.0.service" \
+    "${pkgdir}/usr/lib/systemd/system/systemd-backlight@backlight:228200000.display-pipe.0.service"
+  install -Dm644 "etc/systemd/system/systemd-backlight@backlight:appletb_backlight.service" \
+    "${pkgdir}/usr/lib/systemd/system/systemd-backlight@backlight:appletb_backlight.service"
+
+  install -Dm644 "etc/udev/rules.d/99-touchbar-seat.rules" \
+    "${pkgdir}/usr/lib/udev/rules.d/99-touchbar-seat.rules"
+  install -Dm644 "etc/udev/rules.d/99-touchbar-tiny-dfr.rules" \
+    "${pkgdir}/usr/lib/udev/rules.d/99-touchbar-tiny-dfr.rules"
+
+  install -d "${pkgdir}/usr/share/tiny-dfr"
+  cp -r share/tiny-dfr/. "${pkgdir}/usr/share/tiny-dfr/"
+
+  install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
+
+# vim:set sw=2 sts=2 et:

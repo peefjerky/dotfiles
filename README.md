@@ -154,10 +154,17 @@ expose the Speaker/Codec subdevices before `t2bce_audio` probes:
 - `ActiveBrightness` in `tiny-dfr/config.toml` is **inert on Intel T2**. It is a
   0-255 curve for Apple Silicon's `display-pipe` backlight; `hid_appletb_bl` here
   exposes exactly three steps (off / dim / max) and sits on max.
-- Level 1 ("dim") is PWM'd and visibly flickers. `hid-appletb-kbd` dims after
-  `dim_timeout` then powers off `idle_timeout` later, so
-  `modprobe.d/hid-appletb.conf` sets `autodim=N` to pin it at max. The panel is a
-  backlit LCD -- no burn-in cost.
+- Level 1 ("dim") is PWM'd and visibly flickers, and **two** things dim the bar.
+  `modprobe.d/hid-appletb.conf` sets `autodim=N`, which disables the *driver's*
+  timer -- necessary but not sufficient. **tiny-dfr runs its own idle timer** and
+  writes the backlight directly on constants hardcoded in `src/backlight.rs`
+  (`DIMMED_BRIGHTNESS = 1`, 30s dim / 60s off) with no config key for any of
+  them, on master as well as 0.3.2.
+
+  `DIMMED_BRIGHTNESS = 1` is right on Apple Silicon, where `display-pipe` is a
+  0-255 backlight. On Intel T2, where `hid_appletb_bl` has only 0/1/2, it selects
+  the one broken step. `packages/tiny-dfr-t2/` rebuilds tiny-dfr with it set to
+  2, so "dim" is simply max: no flicker, 60s power-off untouched.
 
 ### Suspend and hibernate
 
