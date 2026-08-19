@@ -26,6 +26,7 @@ application/zip=org.gnome.Nautilus.desktop;
 [Default Applications]
 inode/directory=thunar.desktop
 text/plain=org.gnome.TextEditor.desktop;
+image/jpeg=swappy.desktop
 x-scheme-handler/http=zen.desktop
 x-scheme-handler/https=zen.desktop
 x-scheme-handler/chrome=zen.desktop
