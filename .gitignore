@@ -47,3 +47,9 @@ Thumbs.db
 
 # Staging artifacts
 dotfiles-staging/
+
+# tiny-dfr-t2 makepkg build artifacts
+packages/tiny-dfr-t2/pkg/
+packages/tiny-dfr-t2/src/
+packages/tiny-dfr-t2/*.tar.gz
+packages/tiny-dfr-t2/*.pkg.tar.zst

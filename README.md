@@ -179,9 +179,22 @@ swapfile under zram causes LRU inversion. Never add both.
 
 ### Keyboard modifier mapping
 
-`modprobe.d/hid_apple.conf` sets `swap_opt_cmd=1` system-wide (physical Command =
-SUPER). Hyprland counters with `kb_options = "altwin:swap_alt_win"` so the
-logical mapping is right inside Wayland.
+`modprobe.d/hid_apple.conf` sets **only** `fnmode=2`. Nothing swaps modifiers --
+not the kernel, not Hyprland (`kb_options` is unset; `hyprctl getoption` reports
+`set: false`). hid-apple's default already gives the mapping the keybinds want:
+
+    physical   [fn] [control] [option] [command] [space]
+    emits            CTRL       ALT      SUPER
+
+So "Cmd" in every bind means the physical Command key. `swap_opt_cmd=1` -- which
+this repo shipped for a while -- moves SUPER one key left onto Option and pushes
+ALT onto Command. That is the PC key *order* (ctrl/super/alt) but not the labels,
+and it makes every SUPER bind fire from the wrong key.
+
+hid_apple loads from the **initramfs** here (`apple_bce` at ~1.08s, just after
+`Run /init`), so this file is baked into the image: `sudo limine-mkinitcpio`
+after changing it. Both params are also live-writable under
+`/sys/module/hid_apple/parameters/` and take effect on the next keypress.
 
 ---
 
