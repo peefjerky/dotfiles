@@ -221,6 +221,13 @@ back up first.
 
 ### apply-system.sh
 
+> Initramfs note: `linux-cachyos` ships no `/etc/mkinitcpio.d` preset -- only
+> `linux-cachyos-lts` does -- and boot entries are managed by
+> `limine-mkinitcpio-hook`. So `mkinitcpio -P` rebuilds the **LTS** image and
+> leaves the running kernel's untouched. Use `sudo limine-mkinitcpio`. The audio
+> blacklists do not need it either way: those modules are not loaded from the
+> initramfs.
+
     bash apply-system.sh
 
 **Run this after changing anything under `system/`.** It is the root-owned half
