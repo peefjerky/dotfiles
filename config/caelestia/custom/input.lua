@@ -22,15 +22,26 @@
 --
 --   1 finger -> left, 2 fingers -> right, 3 fingers -> middle
 --
--- KEEP THIS FILE TO THE ONE OPTION. The Lua provider silently rejects quoted
--- hyphenated keys such as ["tap-to-click"] and ["tap-and-drag"] -- they parse as
--- Lua but never reach Hyprland (hyprctl getoption reports set: false) and they
--- raise a config error. Both already default to true, so there is nothing to
--- gain by naming them. Anything with a hyphen in its Hyprland option name cannot
--- be set from here.
+-- NOTHING WITH A HYPHEN IN ITS NAME CAN BE SET FROM HERE. The Lua provider
+-- silently rejects quoted hyphenated keys such as ["tap-to-click"] and
+-- ["tap-and-drag"] -- they parse as Lua but never reach Hyprland (hyprctl
+-- getoption reports set: false) and they raise a config error. Both already
+-- default to true, so there is nothing to gain by naming them.
+--
+-- Keyboard layout: caelestia's hyprland/input.lua hardcodes kb_layout = "us".
+-- This file is required from hypr-user.lua, which loads after it, so setting
+-- it again here wins. in(eng) is "English (India, with rupee)": character for
+-- character the US layout, plus AltGr+4 -> Rs.
+--
+-- This does NOT affect modifier positions. Which physical key emits SUPER is
+-- decided by hid-apple's swap_opt_cmd (see system/modprobe.d/hid_apple.conf),
+-- not by xkb -- no layout puts Command and Option in different places.
 
 hl.config({
     input = {
+        kb_layout  = "in",
+        kb_variant = "eng",
+
         touchpad = {
             clickfinger_behavior = true,
         },
