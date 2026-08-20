@@ -55,7 +55,6 @@ x-scheme-handler/webcals=userapp-Thunderbird-VIWUT3.desktop
 text/calendar=userapp-Thunderbird-VIWUT3.desktop
 application/x-extension-ics=userapp-Thunderbird-VIWUT3.desktop
 x-scheme-handler/net.thunderbird=userapp-Thunderbird-MFAPT3.desktop
-x-scheme-handler/bitwarden=bitwarden.desktop
 application/zip=extract-here.desktop
 application/x-7z-compressed=extract-here.desktop
 application/vnd.rar=extract-here.desktop

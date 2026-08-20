@@ -38,7 +38,6 @@ local function apply_resizer_rules(win)
     local pip_actions = fn.move_actions(win) or {}
 
     -- Bitwarden
-    fn.resizer(win, "Bitwarden", 20, 54, float_center, true, "class")                                       -- Native app
     fn.resizer(win, "^Extension: %(Bitwarden Password Manager%) %- Bitwarden", 20, 54, float_center, false) -- Firefox
     fn.resizer(win, "nngceckbapebfimnlniiiahkandclblb", 20, 54, float_center, true, "class")                -- Chromium
 
