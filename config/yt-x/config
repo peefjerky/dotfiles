@@ -19,7 +19,9 @@
 # ===================================================================================
 
 # List of extensions to load automatically on startup
-CONFIG_AUTOLOADED_EXTENSIONS=""
+# See extensions/cmds/no-gum.sh -- it stops yt-x using gum, whose terminal
+# capability probes leak their replies into fzf's input.
+CONFIG_AUTOLOADED_EXTENSIONS="cmds/no-gum.sh"
 
 # Enable or disable colored/formatted output
 # Options: true, false (Default: true)
@@ -31,11 +33,18 @@ CONFIG_LAUNCHER="fzf"
 
 # Enable image/video previews within the selector
 # Options: true, false (Default: false)
-CONFIG_ENABLE_PREVIEW="false"
-CONFIG_ENABLE_PREVIEW_IMAGES="false"
+CONFIG_ENABLE_PREVIEW="true"
+CONFIG_ENABLE_PREVIEW_IMAGES="true"
 
 # The tool used to render previews in the terminal
 # Options: chafa, icat, imgcat (Default: chafa)
+# chafa, not icat. Both can drive the kitty graphics protocol, but icat has to
+# ask the terminal for its pixel size and hard-errors if nothing answers -- and
+# inside an fzf preview nothing reliably does, because fzf owns the tty reader.
+# The stolen replies then get echoed as literal text in the search bar.
+# chafa can be told the protocol outright and skip probing entirely, which is
+# what ~/.config/yt-x/fzf-preview.sh does. Image quality is identical: both end
+# up sending the same APC _G graphics escape.
 CONFIG_IMAGE_RENDERER="chafa"
 
 # Extra arguments for specific image renderers
@@ -51,7 +60,19 @@ CONFIG_YT_DLP_OPTS=""
 CONFIG_PLAYER="mpv"
 
 # Extra arguments for specific media players
-CONFIG_MPV_ARGS=""
+# Always 1080p, never AV1. This machine is an Ice Lake Iris Plus G7, which
+# decodes VP9 and H.264 in hardware but has no AV1 block at all (vainfo lists
+# VAProfileVP9Profile0-3 and no AV1 profile), so an av01 stream would fall back
+# to the CPU -- fans up, battery down, for the same picture. Excluding it lands
+# on VP9 248, which is what YouTube serves at 1080p anyway.
+# The two fallbacks matter: some videos have no non-AV1 1080p, and a few are
+# muxed-only, so bail to bestvideo+bestaudio and then to a progressive stream.
+#
+# The cookie handoff is separate from CONFIG_BROWSER below, because that one
+# only reaches yt-dlp when yt-x fetches metadata; mpv resolves the stream URL
+# itself through its ytdl_hook. Without this, member-only and age-gated videos
+# in the subscriptions feed list fine and then refuse to play.
+CONFIG_MPV_ARGS="--ytdl-format=bestvideo[height<=?1080][vcodec!*=av01]+bestaudio/bestvideo[height<=?1080]+bestaudio/best[height<=?1080]/best --ytdl-raw-options=cookies-from-browser=firefox:$HOME/.local/state/yt-x/zen-profile"
 CONFIG_VLC_ARGS=""
 CONFIG_TPLAY_ARGS=""
 
@@ -71,7 +92,17 @@ CONFIG_PER_PAGE="30"
 # passed to --cookies-from-browser yt-dlp option
 # Currently supported browsers are: brave, chrome, chromium, edge, firefox, opera, safari, vivaldi, whale
 # NOTE: this option is entirely dependent on what yt-dlp supports
-CONFIG_BROWSER=""
+# Zen is a Firefox fork, so yt-dlp reads it with the firefox backend pointed at
+# an explicit profile path -- "zen" is not one of the names yt-dlp knows, and the
+# profile does not live under ~/.mozilla/firefox where a bare profile name would
+# be looked up. The real profile is "~/.config/zen/miffdfiy.Default (release)";
+# the symlink exists only because that name has spaces in it and yt-x splats
+# $CONFIG_BROWSER unquoted into its yt-dlp argv (yt-x:2056, yt-x:2291).
+#
+# psd keeps the profile on tmpfs and leaves a symlink behind, so this is a
+# symlink to a symlink -- resolved lazily, so a psd resync does not break it.
+# Sync the subscription list with: Miscellaneous -> Sync YouTube Subscriptions.
+CONFIG_BROWSER="firefox:$HOME/.local/state/yt-x/zen-profile"
 
 # Text editor for manual configuration/metadata editing
 # Options: vim, nano, code ... (Default: $EDITOR or vi)
@@ -111,25 +142,17 @@ CONFIG_FZF_HEADER="\
 "
 CONFIG_FZF_OPTS="
   --ansi
+  # Colours live in extensions/themes/default.theme, which tracks the caelestia
+  # wallpaper scheme through the terminal palette. Do not re-add --color here.
+  # Run preview subprocesses under sh, not $SHELL. fzf defaults to $SHELL, which
+  # here is fish, and yt-x's preview preamble is POSIX -- fish rejects the bare
+  # VAR='...' assignments outright (yt-x:1247-1255). CONFIG_FZF_OPTS reaches fzf
+  # through the exported FZF_DEFAULT_OPTS, which fzf parses with real quoting, so
+  # the quotes below survive; they would not on argv.
+  --with-shell='sh -c'
   --border
   --scheme=history
   --style=full
-  --color=bg+:#283457
-  --color=bg:#16161e
-  --color=border:#27a1b9
-  --color=fg:#c0caf5
-  --color=gutter:#16161e
-  --color=header:#2ac3de
-  --color=hl+:#2ac3de
-  --color=hl:#2ac3de
-  --color=info:#545c7e
-  --color=marker:#ff007c
-  --color=pointer:#ff007c
-  --color=prompt:#2ac3de
-  --color=query:#c0caf5:regular
-  --color=scrollbar:#27a1b9
-  --color=separator:#ff9e64
-  --color=spinner:#ff007c
   --border=rounded
   --border-label=''
   --prompt=' >'
@@ -145,7 +168,7 @@ CONFIG_FZF_OPTS="
   -i
   --exact
   --tabstop=1
-  --preview-window=border-rounded,left,35%,wrap
+  --preview-window=border-rounded,left,45%,wrap
   --wrap"
 
 # Rofi config all are required to run rofi as a launcher

@@ -54,3 +54,7 @@ packages/tiny-dfr-t2/src/
 packages/tiny-dfr-t2/*.tar.gz
 packages/tiny-dfr-t2/*.pkg.tar.zst
 __pycache__/
+
+# yt-x per-user state: watch history and the 235-channel subscription list
+# synced from Zen. recents.json predates this rule and is still tracked.
+config/yt-x/my/

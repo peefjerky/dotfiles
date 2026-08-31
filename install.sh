@@ -53,6 +53,18 @@ for f in starship.toml thorium-flags.conf electron-flags.conf chrome-flags.conf 
     echo "  -> $f"
 done
 
+# yt-x renders fzf previews through a shared helper it generates into its cache.
+# Ours replaces it (upstream's round-trips the terminal, which corrupts fzf's
+# input -- see the header of config/yt-x/fzf-preview.sh). yt-x only writes that
+# file when it is missing, and its cache sweep is `find -type f`, which does not
+# match a symlink, so pointing it at the repo copy survives both.
+if [ -f "$CONFIG_SRC/yt-x/fzf-preview.sh" ]; then
+    mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/yt-x/previews/text"
+    ln -sfn "$CONFIG_SRC/yt-x/fzf-preview.sh" \
+        "${XDG_CACHE_HOME:-$HOME/.cache}/yt-x/previews/text/fzf-preview.sh"
+    echo "  -> yt-x fzf-preview.sh (into the preview cache)"
+fi
+
 echo ""
 
 # --------------------------------------------------------

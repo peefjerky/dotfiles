@@ -1,0 +1,53 @@
+# ==============================================================================
+# yt-x theme -- follows caelestia's wallpaper scheme, with nothing to regenerate
+# ==============================================================================
+#
+# There is no caelestia template behind this file, on purpose. caelestia already
+# writes the entire palette as OSC escapes to
+# ~/.local/state/caelestia/sequences.txt (utils/theme.py: gen_sequences ->
+# apply_terms), and config.fish:36 cats that file into every new shell. So by
+# the time yt-x runs, the terminal's own colour table IS the wallpaper scheme:
+#
+#     0-15   term0..term15
+#     16     primary        <- caelestia overrides these three beyond the
+#     17     secondary         usual 6x6x6 cube, see gen_sequences()
+#     18     tertiary
+#
+# Referring to indices instead of hex means a wallpaper change retints yt-x the
+# moment a new shell opens -- no template, no `caelestia scheme` post-hook, no
+# copy of the colours to drift out of date.
+#
+# -1 is fzf's "terminal default", which keeps kitty's 0.6 background_opacity and
+# Hyprland's blur showing through instead of painting an opaque slab over it.
+# That is also why there is no selection bar: bg+ stays -1 and the cursor line
+# is marked with a bold accent foreground instead. A bar would be the one opaque
+# rectangle on an otherwise transparent panel.
+#
+# Sourced by __load_default_theme (yt-x:773), which runs after the config file
+# and before __post_config_load exports FZF_DEFAULT_OPTS -- so appending to
+# CONFIG_FZF_OPTS down here still lands. It is only sourced when COLORTERM is
+# truecolor or 24bit (yt-x:84); outside kitty, fzf just falls back to its own
+# defaults, which is fine.
+# ==============================================================================
+
+_ytx_fg() { printf '\033[38;5;%sm' "$1"; }
+
+THEME_FZF_ICON_COLOR_PRIMARY="$(_ytx_fg 16)"
+THEME_FZF_ICON_COLOR_SECONDARY="$(_ytx_fg 17)"
+THEME_FZF_ICON_COLOR_ACCENT="$(_ytx_fg 18)"
+THEME_FZF_ICON_COLOR_ERROR="$(_ytx_fg 9)"
+
+THEME_FZF_PREVIEW_TITLE="$(printf '\033[1m')$(_ytx_fg 15)"
+THEME_FZF_PREVIEW_KEY="$(_ytx_fg 16)"
+THEME_FZF_PREVIEW_VALUE="$(_ytx_fg 7)"
+THEME_FZF_PREVIEW_DIVIDER="$(_ytx_fg 8)"
+
+THEME_PLAYER_START="$(_ytx_fg 2)"
+
+CONFIG_FZF_OPTS="$CONFIG_FZF_OPTS
+  --color=fg:-1,bg:-1,gutter:-1,query:-1
+  --color=fg+:16:bold,bg+:-1,hl:18,hl+:16
+  --color=border:17,separator:8,scrollbar:17
+  --color=prompt:16,pointer:16,marker:16,spinner:16
+  --color=header:17,info:8,label:16
+  --color=preview-fg:-1,preview-bg:-1"

@@ -57,7 +57,9 @@ with the linux-t2 kernel and the **caelestia** Quickshell desktop.
       fish/ kitty/        Shell and terminal
       nvim/ mpv/ btop/    Editor, player, monitor
       cava/ easyeffects/  Audio visualiser and speaker DSP
-      alacritty/ herdr/ yt-x/ spicetify/
+      yt-x/               Terminal YouTube: caelestia-themed fzf UI, thumbnail
+                          previews, description cache. See below.
+      alacritty/ herdr/ spicetify/
       starship.toml, thorium-flags.conf, mimeapps.list
 
     local/                ~/.local/ -- things that are actual work, not installed files
@@ -286,6 +288,76 @@ Only `~/.config/thorium` is synced; the ~2 GB of `~/.cache/thorium` is left on
 disk deliberately, since it is regenerable and would be pure overlay waste.
 
 ---
+
+## YouTube in the terminal
+
+`yt-x` drives search, subscriptions and playback from fzf. Four things here are
+not stock.
+
+**Theme.** `config/yt-x/extensions/themes/default.theme` colours the UI and fzf
+from terminal palette *indices* rather than hex. caelestia already writes the
+whole scheme as OSC escapes to `~/.local/state/caelestia/sequences.txt`, and
+`config.fish` cats that into every shell, so by the time yt-x starts, index
+16/17/18 are primary/secondary/tertiary. A wallpaper change retints yt-x with
+nothing to re-run and no fourth template to drift out of date. Backgrounds stay
+at `-1` so kitty's transparency and Hyprland's blur show through.
+
+**Previews.** yt-x generates a shared preview helper into its cache; this repo
+replaces it with `config/yt-x/fzf-preview.sh`, symlinked in by `install.sh`.
+That works because yt-x only writes the file when it is missing and `[ -s ]`
+follows symlinks, while its 3-day cache sweep is `find -type f`, which does not
+match one. The rewrite is needed because both upstream renderers round-trip the
+terminal -- `kitten icat` hard-errors without a pixel-size reply -- and inside an
+fzf preview fzf owns the tty reader, so that is a race. `chafa --probe off -f
+kitty` asks nothing. It also pads the cursor past the image: chafa sends one
+placement covering the `r=` rows named in its own header but emits a single
+newline, so without padding every metadata line is drawn inside the image's
+footprint, under a graphic kitty paints on top of text.
+
+**Descriptions** are not in the data. yt-x lists with `--flat-playlist`, and a
+subscriptions or channel tab carries no description field, so the generated
+preview ends up with a literal `if ! [ null = "null" ]`. The fix joins a
+thumbnail back to its video through the cache filename: yt-x names each picture
+`sha256(thumbnails[-1].url)`, and that url holds the id in its `/vi/<id>/`
+segment. One detached yt-dlp then fetches every description on the page with
+`--print-to-file`, so hovers are file reads, never network waits. The first pass
+over a new page shows nothing while that runs. Search pages are skipped
+deliberately -- yt-x prints its own snippet there. `YTX_DESCRIPTIONS=0` at the
+top of the file turns it all off.
+
+**gum is hidden from yt-x** by `extensions/cmds/no-gum.sh`. gum 2.0 is a Bubble
+Tea program: it probes the terminal with DECRQM 2026, DECRQM 2027 and `CSI ? u`,
+then exits without draining the replies, which arrive too late and land in
+whatever reads the tty next -- as `?2026;2$y?2027;1$y?1u` in an fzf query bar, or
+echoed after gum spin's own default title, "Loading...". yt-x gates all four gum
+call sites on one `_dep_ch` helper, so overriding that helper is the entire fix.
+gum stays installed and works everywhere else.
+
+Subscriptions come from Zen's cookies. Zen is a Firefox fork, so yt-dlp wants the
+firefox backend aimed at an explicit profile path -- `zen` is not a name it
+knows, and the profile is not under `~/.mozilla/firefox` where a bare name would
+be looked up. The path is symlinked because the real directory name contains
+spaces and yt-x splats `$CONFIG_BROWSER` unquoted into its yt-dlp argv:
+
+    mkdir -p ~/.local/state/yt-x
+    ln -sfn "$HOME/.config/zen/<hash>.Default (release)" ~/.local/state/yt-x/zen-profile
+
+Then: Miscellaneous -> Sync YouTube Subscriptions.
+
+Playback is pinned to 1080p and excludes AV1. This machine's Iris Plus G7 decodes
+VP9 and H.264 in hardware but has no AV1 block at all, so an av01 stream would
+fall back to the CPU for the same picture. mpv gets the same cookies separately,
+because `CONFIG_BROWSER` only reaches yt-dlp for metadata -- mpv resolves the
+stream itself through its ytdl_hook, and without them member-only and age-gated
+videos list fine and then refuse to play.
+
+`config/mpv/script-opts/thumbfast.conf` adds seekbar thumbnail previews. uosc was
+already installed and already draws them; it has no thumbnailer of its own, so
+without thumbfast it sends hover messages into a void. `network=yes` is the line
+that matters -- thumbfast disables itself on any network source by default. It
+does not cost a second yt-dlp resolve: for a ytdl stream it hands its worker the
+already-resolved `stream-open-filename` and spawns it with `--ytdl=no`. Neither
+`thumbfast.lua` nor uosc is tracked here; the fetch command is in the conf header.
 
 ## Installation
 
