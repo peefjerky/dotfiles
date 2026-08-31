@@ -1,0 +1,62 @@
+--- /etc/xdg/quickshell/caelestia/modules/drawers/ContentWindow.qml	2026-08-12 05:55:36.000000000 +0530
++++ modules/drawers/ContentWindow.qml	2026-08-12 06:01:56.292712876 +0530
+@@ -12,6 +12,7 @@
+ import qs.components.containers
+ import qs.services
+ import qs.modules.bar
++import qs.modules.notepad
+ 
+ StyledWindow {
+     id: root
+@@ -68,7 +69,7 @@
+     name: "drawers"
+     WlrLayershell.exclusionMode: ExclusionMode.Ignore
+     WlrLayershell.layer: (fsTransitionProg > 0 && contentItem.Config.general.showOverFullscreen) || (hasSpecialWorkspace && hasFullscreenOnNormalWs) ? WlrLayer.Overlay : WlrLayer.Top
+-    WlrLayershell.keyboardFocus: screenState.launcher || screenState.session ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
++    WlrLayershell.keyboardFocus: screenState.launcher || screenState.session || NotepadState.open ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+ 
+     mask: hasFullscreen ? emptyRegion : regions
+ 
+@@ -117,6 +118,8 @@
+             const conf = root.contentItem.Config;
+             if ((s.launcher && conf.launcher.enabled) || (s.session && conf.session.enabled) || (s.sidebar && conf.sidebar.enabled))
+                 return true;
++            if (NotepadState.open)
++                return true;
+             if (!conf.dashboard.showOnHover && s.dashboard && conf.dashboard.enabled)
+                 return true;
+             if (panels.popouts.currentName.startsWith("traymenu") && (panels.popouts.current as StackView)?.depth > 1)
+@@ -129,6 +132,7 @@
+             root.screenState.session = false;
+             root.screenState.sidebar = false;
+             root.screenState.dashboard = false;
++            NotepadState.open = false;
+             panels.popouts.hasCurrent = false;
+             bar.closeTray();
+         }
+@@ -188,6 +192,15 @@
+             deformAmount: 0.1
+         }
+ 
++        // The notepad. Same deform as the launcher -- it is the same shape in the
++        // same place, and a large slab wants low wobble.
++        PanelBg {
++            id: notepadBg
++
++            panel: panels.notepad
++            deformAmount: 0.1
++        }
++
+         PanelBg {
+             id: sessionBg
+ 
+@@ -276,6 +289,9 @@
+             launcher.transform: Matrix4x4 {
+                 matrix: launcherBg.deformMatrix
+             }
++            notepad.transform: Matrix4x4 {
++                matrix: notepadBg.deformMatrix
++            }
+             session.transform: Matrix4x4 {
+                 matrix: sessionBg.deformMatrix
+             }

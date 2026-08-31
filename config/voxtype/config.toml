@@ -17,13 +17,21 @@ device = "default"          # -> alsa_input.pci-0000_e6_00.3.BuiltinMic
 sample_rate = 16000
 max_duration_secs = 300     # default 60 is short for dictating a paragraph
 
+# Pause MPRIS players while recording, resume after. Worth it here: this mic sits
+# ~11 dB above its noise floor, and both Whisper and Parakeet hallucinate on
+# near-silence, so music leaking in is a real transcription risk -- not just an
+# annoyance. v1.0.0 drives MPRIS over D-Bus directly; the old playerctl shell-out
+# is gone, and with it the resume bug noted in DICTATION.md (Omarchy #6029).
+pause_media = true
+
 [parakeet]
 # int8 build: this CPU has avx512_vnni, so ONNX Runtime accelerates int8 in
-# hardware. Model stays resident (on_demand_loading = false) — 640 MB against
-# 10 GB free buys back ~1.2 s of load time on every single utterance.
+# hardware. Model is loaded per-utterance (on_demand_loading = true): gives back
+# ~640 MB resident for ~1.2 s of load latency on each dictation. Flipped 2026-08-24
+# when idle RAM became the priority over dictation latency; set false to revert.
 model = "parakeet-tdt-0.6b-v3-int8"
 model_type = "tdt"
-on_demand_loading = false
+on_demand_loading = true
 
 [output]
 mode = "type"
@@ -79,6 +87,11 @@ threshold = 0.3
 #
 # Multi-word keys are used deliberately over bare first names: mapping a lone
 # honorific like "mam" would rewrite it in every unrelated sentence.
+
+# Spoken punctuation: say "period"/"comma"/"new line" and get the mark instead of
+# the word. Parakeet TDT already auto-punctuates from prosody, so this is the
+# override for when it guesses wrong -- dictated marks win over inferred ones.
+spoken_punctuation = true
 
 [text.replacements]
 # TrataTech -- two words in, one word out.

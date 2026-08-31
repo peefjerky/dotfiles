@@ -21,7 +21,7 @@ with the linux-t2 kernel and the **caelestia** Quickshell desktop.
     Chip      : Apple T2 Security Chip (BCE/VHCI audio + USB routing)
     Display   : eDP-1 @ 2560x1600, 226 PPI, scale 1.6 (-> 1600x1000 logical)
     GPU       : Intel Iris Plus Graphics (ICL GT2)
-    Kernel    : 7.1.8-1-cachyos
+    Kernel    : 7.2.2-1-cachyos (t2bce driver stack)
     Distro    : CachyOS
 
 ---
@@ -29,12 +29,12 @@ with the linux-t2 kernel and the **caelestia** Quickshell desktop.
 ## Stack
 
     Compositor  Hyprland 0.56.2, configured in Lua (not hyprland.conf)
-    Shell       caelestia-shell 2.3.0 + caelestia-cli 1.1.2 on Quickshell 0.3.0
+    Shell       caelestia-shell 2.4.0 + caelestia-cli 1.1.2 on Quickshell 0.3.1
     Terminal    kitty
     Shell       fish + starship
     Theming     matugen, driven by caelestia's scheme.json
     Touch Bar   tiny-dfr
-    Dictation   voxtype (Parakeet TDT v3, local, CPU)
+    Dictation   voxtype 1.0.0 (Parakeet TDT v3, local, CPU)
 
 > **This replaced the previous dots-hyprland / illogical-impulse setup.**
 > Nothing from that stack remains. If you are looking for the old `quickshell/ii`
@@ -46,8 +46,14 @@ with the linux-t2 kernel and the **caelestia** Quickshell desktop.
 
     config/               User configs (~/.config/)
       caelestia/          THE shell config -- see below. The heart of this repo.
+      quickshell/caelestia/
+                          Shadow tree over the packaged shell: symlinks to the
+                          package, plus the Cmd+G notepad module and three
+                          patched modules/drawers/ files. See below.
       hypr/               Hyprland Lua entry point + variables
       voxtype/            Local dictation: engine, VAD, replacements, OSD
+      psd/                profile-sync-daemon -- browser profiles in tmpfs
+      systemd/user/       User unit drop-ins (EasyEffects restart, app.slice oomd)
       fish/ kitty/        Shell and terminal
       nvim/ mpv/ btop/    Editor, player, monitor
       cava/ easyeffects/  Audio visualiser and speaker DSP
@@ -57,6 +63,7 @@ with the linux-t2 kernel and the **caelestia** Quickshell desktop.
     local/                ~/.local/ -- things that are actual work, not installed files
       bin/extract-here    Archive extractor wired to Thunar via mimeapps.list
       bin/voxtype-submap  Hyprland Lua-dispatch shim for voxtype's submaps
+      bin/projector       Drives a Moonlight session on the EO9022 projector
       share/voxtype/quickshell/
                           voxtype's OSD, retargeted at caelestia's theme
 
@@ -65,8 +72,14 @@ with the linux-t2 kernel and the **caelestia** Quickshell desktop.
       tiny-dfr/           Touch Bar daemon config
       ananicy.d/          Process priority overrides
       udev/rules.d/       T2 audio wake rule
-      systemd/system/     t2bce-audio.service
-      scripts/            t2-pci-wake.sh, t2bce-audio-load.sh
+      systemd/system/     t2bce-audio.service, appletbdrm-rebind.service
+      scripts/            t2-pci-wake.sh, t2bce-audio-load.sh, appletbdrm-rebind,
+                          voxtype-osd-restore
+      psd/browsers/       Thorium and Zen definitions psd does not ship
+      sddm/               Wayland greeter drop-in -- parked, see the file header
+      pacman.d/hooks/     Pacman hooks (voxtype OSD re-theme, ...)
+      fonts/              Endless.ttf
+      t2bce-migrate.sh    apple-bce -> t2bce initramfs migration for 7.2.0
 
     packages/
       pacman-explicit.txt   Explicitly installed pacman packages
@@ -77,21 +90,25 @@ with the linux-t2 kernel and the **caelestia** Quickshell desktop.
       papirus-accent/       Icon-theme accent sync (sudoers rule + helper)
 
     DICTATION.md          Build brief and implementation log for voxtype
+    CASTING.md            Casting to a TV/projector: Sunshine + Moonlight, and why
+                          Miracast and AirPlay are dead ends on this hardware
 
 ---
 
 ## caelestia
 
 caelestia ships its config in `/etc/xdg/quickshell/caelestia/`, which is
-**package-owned and overwritten on every update**. Nothing in this repo touches
-it. All customisation goes through the two extension points caelestia provides:
+**package-owned and overwritten on every update**. Nothing in this repo edits it
+in place. Most customisation goes through the two extension points caelestia
+provides; the notepad needs to live inside the shell's own process, so it uses a
+symlink shadow tree instead (see Notepad below):
 
     config/caelestia/hypr-user.lua    Loaded last by ~/.config/hypr/hyprland.lua.
                                       Monitor scale, hyprpm, plugin config.
     config/caelestia/hypr-vars.lua    Loaded first -- variable/keybind overrides
                                       that must land before caelestia's modules.
     config/caelestia/custom/*.lua     Scrolling layout, rules, input, animations,
-                                      border colours, keybinds, notepad launcher.
+                                      border colours, keybinds.
     config/caelestia/shell.json       Shell settings (explorer, toasts, ...)
     config/caelestia/templates/       Rendered into ~/.local/state/caelestia/theme/
                                       on *every* scheme change. This is how
@@ -109,22 +126,28 @@ caelestia's own `config.fish` sources last and never overwrites.
 ### Templates
 
 `caelestia/utils/theme.py: apply_user_templates()` renders every file in
-`~/.config/caelestia/templates/` on each scheme change, unconditionally. Two
+`~/.config/caelestia/templates/` on each scheme change, unconditionally. Three
 live here:
 
     sddm-theme.conf      SDDM login theme colours
     zen-userChrome.css   Zen browser chrome, symlinked into the Zen profile
+    zathurarc            Zathura PDF viewer colours
 
 Syntax is `{{ colourname.form }}` where form is `hex` / `hexalpha` / `rgb` /
 `rgbalpha`, plus `{{ mode }}`.
 
 ### Notepad
 
-`config/caelestia/custom/notepad/` is a **separate Quickshell config** (`qs -p`),
-not a caelestia module -- caelestia has no drop-in mechanism for user QML. It
-imports caelestia's private plugins (`Caelestia.Config`, `Caelestia.Blobs`) from
-`/usr/lib/qt6/qml/Caelestia/`, which are not a public API and can break on a
-shell update. `CAELESTIA-BLOBS.md` in that directory documents the SDF blob
+`config/quickshell/caelestia/modules/notepad/` is a module **inside** caelestia's
+own shell, not a separate process. `~/.config/quickshell/caelestia/` shadows the
+packaged `/etc/xdg/quickshell/caelestia/` in Quickshell's search path: everything
+there is a symlink back to the package except this module and three patched
+`modules/drawers/` files. That gets the notepad into caelestia's own `BlobGroup`,
+so it merges with the launcher and sidebar the way caelestia's own panels do.
+
+Run `modules/notepad/install.sh` to build the shadow tree, and re-run it after a
+`caelestia-shell` upgrade -- it refuses to touch anything if the patches no longer
+apply cleanly. `CAELESTIA-BLOBS.md` in that directory documents the SDF blob
 renderer it depends on.
 
 ---
@@ -166,8 +189,8 @@ expose the Speaker/Codec subdevices before `t2bce_audio` probes:
   the one broken step. `packages/tiny-dfr-t2/` rebuilds tiny-dfr with it set to
   2, so "dim" is simply max: no flicker, 60s power-off untouched.
 
-- **The bar is dark after some boots.** `appletbdrm` races `apple_bce`'s virtual
-  USB HCI and its probe times out:
+- **The bar is dark after some boots.** `appletbdrm` races the BCE virtual USB HCI
+  (`apple_bce` before 7.2.0, `t2bce_vhci` since) and its probe times out:
 
       appletbdrm 5-6:2.1: [drm] *ERROR* Failed to send message (-110)
       appletbdrm 5-6:2.1: probe with driver appletbdrm failed with error -110
@@ -208,8 +231,8 @@ this repo shipped for a while -- moves SUPER one key left onto Option and pushes
 ALT onto Command. That is the PC key *order* (ctrl/super/alt) but not the labels,
 and it makes every SUPER bind fire from the wrong key.
 
-hid_apple loads from the **initramfs** here (`apple_bce` at ~1.08s, just after
-`Run /init`), so this file is baked into the image: `sudo limine-mkinitcpio`
+hid_apple loads from the **initramfs** here (the BCE stack — `t2bce_core` since
+7.2.0, `apple_bce` before it — at ~1.08s, just after `Run /init`), so this file is baked into the image: `sudo limine-mkinitcpio`
 after changing it. Both params are also live-writable under
 `/sys/module/hid_apple/parameters/` and take effect on the next keypress.
 
@@ -225,6 +248,12 @@ path here, not a compromise. Full build log in `DICTATION.md`.
     F9 (hold)           push-to-talk
     F12                 cancel / escape a stuck submap
 
+`[audio] pause_media = true` pauses MPRIS players while recording and resumes
+after. Not a nicety: this mic sits ~11 dB above its noise floor, so anything
+playing bleeds in, and both Whisper and Parakeet hallucinate text on the result.
+Since voxtype 1.0.0 this talks D-Bus directly -- `playerctl` is no longer a
+dependency, and the resume bug it caused (Omarchy #6029) went with it.
+
 Two things that are **not** upstream's recommended setup, because upstream's is
 wrong on this machine:
 
@@ -235,6 +264,26 @@ wrong on this machine:
   driven through `local/bin/voxtype-submap`.
 - `[vad] backend = "auto"` resolves to Energy VAD, which this quiet mic defeats.
   It is pinned to the Silero model instead.
+
+---
+
+## Browser profiles in RAM
+
+`profile-sync-daemon` keeps browser profile directories on tmpfs and rsyncs them
+back to disk periodically and on exit -- fewer small writes to the SSD, faster
+profile reads. `config/psd/psd.conf` selects which browsers are managed.
+
+psd ships definitions for the mainstream browsers but not for either of the ones
+used here, so `system/psd/browsers/` adds them. Both exist because of the same
+trap: psd refuses to sync a browser it sees running, via `pgrep -x`, and both
+`/usr/bin/thorium-browser` and `/usr/bin/zen-browser` are wrapper scripts whose
+real process name differs from the wrapper's. `PSNAME` has to name what actually
+shows up in `/proc/PID/comm` (`thorium`, `zen-bin`) or the sync silently never
+happens. Zen additionally needs `profiles.ini` parsed with quoting intact -- its
+profile directory names contain spaces and parentheses.
+
+Only `~/.config/thorium` is synced; the ~2 GB of `~/.cache/thorium` is left on
+disk deliberately, since it is regenerable and would be pure overlay waste.
 
 ---
 

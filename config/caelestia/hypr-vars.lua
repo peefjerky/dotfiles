@@ -13,6 +13,15 @@
 --
 -- Returns nil when the key is absent, which omits it from the override table
 -- below and lets caelestia's own variables.lua default stand.
+-- Launch through uwsm so each app gets its own systemd scope under app.slice
+-- instead of inheriting the compositor's cgroup. Without this, everything started
+-- from a keybind lands in session.slice/wayland-wm@hyprland.desktop.service --
+-- ~5G across 23 processes -- and systemd-oomd, which kills whole cgroups, would
+-- take down Hyprland and every window with it rather than the one hungry app.
+local function uwsm(cmd)
+    return cmd and ("uwsm app -- " .. cmd) or nil
+end
+
 local function shell_app(key)
     local f = io.popen("jq -r '.general.apps." .. key .. " // empty | join(\" \")' "
         .. "'" .. os.getenv("HOME") .. "/.config/caelestia/shell.json' 2>/dev/null")
@@ -26,14 +35,14 @@ end
 return {
     -- Consumed by hyprland/keybinds.lua as hl.dsp.exec_cmd(vars.terminal) etc.
     -- Change these in the shell's settings UI, then `hyprctl reload`.
-    terminal              = shell_app("terminal"),
-    fileExplorer          = shell_app("explorer"),
-    audioSettings         = shell_app("audio"),
+    terminal              = uwsm(shell_app("terminal")),
+    fileExplorer          = uwsm(shell_app("explorer")),
+    audioSettings         = uwsm(shell_app("audio")),
 
     -- Caelestia has no browser setting, so this one stays owned here.
     -- "zen-browser" is the wrapper script in /usr/bin (the real binary lives at
     -- /opt/zen-browser-bin/zen-bin); use the wrapper so updates can't break it.
-    browser               = "zen-browser",
+    browser               = uwsm("zen-browser"),
 
     -- SUPER+Return opens the terminal. SUPER+T is caelestia's default and is
     -- kept as a second binding — drop it from this list if you want it freed.

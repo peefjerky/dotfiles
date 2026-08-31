@@ -53,3 +53,4 @@ packages/tiny-dfr-t2/pkg/
 packages/tiny-dfr-t2/src/
 packages/tiny-dfr-t2/*.tar.gz
 packages/tiny-dfr-t2/*.pkg.tar.zst
+__pycache__/

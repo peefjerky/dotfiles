@@ -1,0 +1,37 @@
+--- /etc/xdg/quickshell/caelestia/modules/drawers/Panels.qml	2026-08-12 05:55:36.000000000 +0530
++++ modules/drawers/Panels.qml	2026-08-12 06:01:56.295108224 +0530
+@@ -11,6 +11,7 @@
+ import qs.modules.sidebar as Sidebar
+ import qs.modules.utilities as Utilities
+ import qs.modules.bar.popouts as BarPopouts
++import qs.modules.notepad as Notepad
+ import qs.modules.utilities.toasts as Toasts
+ 
+ Item {
+@@ -33,6 +34,7 @@
+     readonly property alias utilities: utilities
+     readonly property alias toasts: toasts
+     readonly property alias sidebar: sidebar
++    readonly property alias notepad: notepad
+ 
+     anchors.fill: parent
+     anchors.margins: borderThickness
+@@ -104,6 +106,18 @@
+         panels: root
+ 
+         anchors.horizontalCenter: parent.horizontalCenter
++        anchors.bottom: parent.bottom
++    }
++
++    // Same anchors as the launcher on purpose: bottom-centred. When both are open
++    // their blobs are in one BlobGroup and smin() fuses them into a single mass.
++    Notepad.Wrapper {
++        id: notepad
++
++        screen: root.screen
++        panels: root
++
++        anchors.horizontalCenter: parent.horizontalCenter
+         anchors.bottom: parent.bottom
+     }
+ 

@@ -1,0 +1,28 @@
+# Zen Browser -- a Firefox fork, so same profiles.ini layout, but under
+# $XDG_CONFIG_HOME/zen instead of $XDG_CONFIG_HOME/mozilla/firefox.
+#
+# PSNAME is the binary as it appears to `pgrep -x`, which psd uses to refuse
+# syncing while the browser is running. /usr/bin/zen-browser is a wrapper; the
+# real process is zen-bin, so that is what has to be matched.
+#
+# Profile dir names contain spaces and parentheses ("miffdfiy.Default (release)"),
+# hence the quoting throughout -- an unquoted expansion splits them.
+
+if [[ -d "$XDG_CONFIG_HOME/zen" ]]; then
+    index=0
+    PSNAME="zen-bin"
+    while read -r profileItem; do
+        if [[ $(echo "$profileItem" | cut -c1) = "/" ]]; then
+            # path is not relative
+            DIRArr[$index]="$profileItem"
+        else
+            # we need to append the default path to give a
+            # fully qualified path
+            DIRArr[$index]="$XDG_CONFIG_HOME/zen/$profileItem"
+        fi
+        (( index=index+1 ))
+    done < <(grep '^[Pp]ath=' "$XDG_CONFIG_HOME/zen/profiles.ini" | sed 's/[Pp]ath=//')
+fi
+
+# Like firefox: the last path component of every profile must be unique.
+check_suffix=1

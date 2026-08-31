@@ -1,0 +1,15 @@
+--- /etc/xdg/quickshell/caelestia/modules/drawers/Regions.qml	2026-08-12 05:55:36.000000000 +0530
++++ modules/drawers/Regions.qml	2026-08-12 06:01:56.300120990 +0530
+@@ -28,6 +28,12 @@
+     }
+ 
+     R {
++        panel: root.panels.notepad
++        y: root.win.height - height
++        height: panel.height * (1 - root.panels.notepad.offsetScale) + root.borderThickness
++    }
++
++    R {
+         panel: root.panels.launcher
+         y: root.win.height - height
+         height: panel.height * (1 - root.panels.launcher.offsetScale) + root.borderThickness

@@ -14,5 +14,8 @@
                 ]
             }
         }
+    },
+    "theme": {
+        "postHook": "sed -i -e '/^set default-bg/s/,255)/,0.6)/' -e '/^set recolor-lightcolor/s/,255)/,0)/' ~/.local/state/caelestia/theme/zathurarc"
     }
 }

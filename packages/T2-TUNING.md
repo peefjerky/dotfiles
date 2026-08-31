@@ -27,7 +27,7 @@ records what the *community* recommends and whether it applies.
 | `t2fanrd` is installed but **disabled** | ✅ fans run on SMC firmware default |
 | ananicy ran the desktop **below** the browser | ✅ fixed, see [[SYSTEM-NOTES]] |
 | `t2_ncm` stalled boot by 60 s | ✅ fixed — upstream has a cleaner fix, below |
-| Kernel will migrate `apple-bce` → `t2bce` | ⚠️ **will break our suspend script** |
+| Kernel migrated `apple-bce` → `t2bce` on 7.2.0 | ✅ done 2026-08-22, cost one emergency boot — §2 |
 | CachyOS kernel bumps have dropped T2 modules before | 📖 keep LTS installed |
 | No VP9 hardware encode on this GPU | ✅ silicon limit, not configuration |
 | Caelestia's Papirus accent-matching **already exists** — don't rebuild it | ✅ §13.3 |
@@ -91,7 +91,7 @@ Recorded for completeness, not recommended.
 
 ---
 
-## 2. The `apple-bce` → `t2bce` migration ⚠️ **read before the next kernel update**
+## 2. The `apple-bce` → `t2bce` migration ✅ **done — read before the next kernel update**
 
 The t2linux wiki has rewritten its suspend guidance. Current text:
 
@@ -103,26 +103,62 @@ The t2linux wiki has rewritten its suspend guidance. Current text:
 >
 > — [t2linux postinstall guide](https://wiki.t2linux.org/guides/postinstall/)
 
-✅ This machine is **still on the old stack** — no action needed *yet*:
+✅ **Migrated 2026-08-22.** `linux-cachyos 7.1.8-1 → 7.2.0-1` (2026-08-21) made the
+switch, and it cost one drop to emergency mode. What actually happened:
 
 ```
-/lib/modules/7.1.8-1-cachyos/kernel/drivers/staging/apple-bce/apple-bce.ko.zst
-lsmod: apple_bce 151552 1
-find /lib/modules/$(uname -r) -iname '*t2bce*'   →   (nothing)
+[2026-08-21T18:43:23] upgraded linux-cachyos (7.1.8-1 -> 7.2.0-1)
+[2026-08-21T18:43:54] ==> ERROR: module not found: 'apple_bce'
+[2026-08-21T18:43:55] ERROR: mkinitcpio failed for kernel 7.2.0-1-cachyos, skipping.
 ```
 
-⚠️ **But `/usr/local/bin/t2-suspend.sh` unloads `apple_bce` on every sleep.** The
-moment a CachyOS kernel ships `t2bce` instead, that script goes from load-bearing to
-actively harmful. Check on every kernel bump:
+`drivers/staging/apple-bce/apple-bce.ko` became `drivers/staging/t2bce/` split four
+ways — `t2bce_core`, `t2bce_dma`, `t2bce_vhci`, `t2bce_audio`. Three failures stacked:
 
-```fish
-find /lib/modules/(uname -r) -iname '*t2bce*' | head -1
+1. **chwd still writes `MODULES+=(apple-bce)`.** Still unfixed upstream as of this
+   writing — [CachyOS/chwd](https://github.com/CachyOS/chwd) master has no commit for
+   it and no issue filed. Every T2 CachyOS user hits this on 7.2.0.
+2. **A missing `MODULES` entry is fatal to mkinitcpio**, so it wrote *no image at all*
+   rather than one without the module.
+3. **`limine-mkinitcpio` swallows that failure.** `limine-mkinitcpio-install` has
+   `process_kernel "$f" || true` and `process_regular_kernel || return 0`, so it exits
+   0 and pacman reports a clean upgrade. **This is why nothing looked wrong until the
+   reboot.** Never trust its exit code — grep its output for `mkinitcpio failed`.
+
+Net effect: a 7.2.0 kernel with no matching initramfs, i.e. root never mounts.
+
+**The fix** — `/etc/mkinitcpio.conf.d/11-chwd.conf`, applied by
+`system/t2bce-migrate.sh`:
+
+```sh
+MODULES+=(apple-bce? t2bce_core? t2bce_vhci?)
 ```
 
-Non-empty output ⇒ **disable `t2-suspend.service` / `t2-resume.service` before
-rebooting into that kernel.** The same applies to the `brcmfmac` hibernate hook and to
-`t2-touchbar-restore.service`, both of which exist to paper over the old stack's
-suspend gaps.
+The trailing `?` marks a module optional — `functions:add_module` sets `ign_errors`
+and returns 0 instead of aborting. One config now valid on 7.1.x, 7.2.x, and whatever
+gets renamed next. `t2bce_dma` needs no entry; it arrives via `t2bce_core`'s `depends`.
+`/etc/modules-load.d/t2.conf` was retired outright — `apple_bce` and `t2bce_core` share
+PCI alias `106b:1801`, so udev autoloads whichever exists.
+
+⚠️ **The `?` trades a hard failure for a soft one.** A future rename won't strand you
+in emergency mode, but the module could go missing from the image silently. Tolerable
+here only because there's no LUKS prompt needing an early keyboard, and the PCI alias
+loads it from the real root anyway.
+
+**Recovery path, if this ever repeats:** boot the `linux-cachyos-lts` entry (it is in
+`BOOT_ORDER`, and 6.18.42 still carries `apple-bce`, so the keyboard works to type a
+sudo password), run the migrate script, reboot.
+
+**Suspend:** the `apple_bce` unload/reload blocks were deleted from `t2-suspend.sh` and
+`t2-resume.sh` (originals kept as `.pre-t2bce`). Both new modules carry their own PM
+ops — `t2bce_core: bce_pm_resume_stateful/_no_state`, `t2bce_vhci:
+bce_vhci_bus_suspend/_resume`, `t2bce_audio: t2audio_pm_ops` — so the workaround is
+obsolete, exactly as the wiki text above says. Everything else in those scripts (Touch
+Bar, sensors, gmux, audio, service stop/start) is unrelated to bce and stays: the Touch
+Bar half is still load-bearing, see [CachyOS #824](https://github.com/CachyOS/linux-cachyos/issues/824).
+
+Verified on 7.2.0: all four modules load, `t2bce_vhci` registers USB bus 5, keyboard,
+trackpad, Touch Bar and `AppleT2x4` audio all present.
 
 The new stack also renames the early-boot modules — `t2bce_dma`, `t2bce_core`,
 `t2bce_vhci` (the last is what makes the keyboard work at a LUKS prompt).
@@ -143,6 +179,12 @@ Two independent 2020 T2 MacBook Pro users plus a MacBook Air user hit it; one re
 via btrfs snapshot, the rest fell back to `6.18 LTS`. Fixed in `7.1.3-1`.
 — [CachyOS forum #32310](https://discuss.cachyos.org/t/missing-apple-bce-module-on-linux-cachyos-7-1-2-2/32310)
 
+It happened again on `7.2.0-1`, differently: the module was not *dropped*, it was
+*renamed*, and the packaging around it (chwd) was not updated to match. Same symptom,
+same emergency mode, but no upstream kernel fix is coming — the rename is intentional
+([t2linux #51](https://github.com/t2linux/linux-t2-patches), 2026-07-22), so the config
+had to change. See §2.
+
 **The lesson is not "7.1.2 was bad".** It is that the T2 patches are out-of-tree
 staging drivers carried on top of the CachyOS kernel, and they can silently fall off
 during a rebase. This will happen again.
@@ -153,11 +195,24 @@ Mitigations, in order of laziness:
    highest-value insurance on this machine. Every user in that thread who had it
    recovered in one reboot.
 2. Snapshots — already covered by btrfs + Limine here.
-3. After any kernel update, before rebooting, confirm the module survived:
+3. After any kernel update, **before rebooting**, confirm the BCE driver survived —
+   under whatever name it goes by this month, and for the *installed* kernel, not the
+   running one (`uname -r` is still the old kernel at that point):
    ```fish
-   ls /lib/modules/(uname -r)/kernel/drivers/staging/apple-bce/
+   for k in /usr/lib/modules/*/
+       echo -n (basename $k)": "
+       ls $k/kernel/drivers/staging/ | grep -iE 'apple-bce|t2bce' | tr '\n' ' '
+       echo
+   end
    ```
-   Watch for `ERROR: module not found` in the pacman output — it scrolls past easily.
+4. Then rebuild and **read the output, not the exit code**:
+   ```fish
+   sudo limine-mkinitcpio 2>&1 | tee /tmp/mk.log
+   grep -E 'mkinitcpio failed|module not found' /tmp/mk.log
+   ```
+   `limine-mkinitcpio` returns 0 even when a kernel's build fails (§2), and pacman
+   reports the upgrade as clean. The error text is the only honest signal, and it
+   scrolls past easily.
 
 Related: a `0006-t2.patch` regression routed a **non-T2** `MacBookAir6,2` down the
 `applesmc` path and broke its keyboard backlight, which shows the T2 patches are not

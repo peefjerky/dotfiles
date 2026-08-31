@@ -1,0 +1,12 @@
+# Thorium -- a Chromium fork, same single-profile-dir layout as chromium.
+#
+# /usr/bin/thorium-browser is a wrapper that ends in
+#   exec -a "$0" "$HERE/thorium" ...
+# exec -a rewrites argv[0], but /proc/PID/comm still comes from the executed
+# file, so `pgrep -x` (what psd uses to refuse syncing a running browser)
+# sees "thorium". PSNAME="$browser" resolves to that via this file's name.
+#
+# Only ~/.config/thorium is synced. The 2G at ~/.cache/thorium is deliberately
+# left on disk -- it is regenerable and would be pure waste in the overlay.
+DIRArr[0]="$XDG_CONFIG_HOME/$browser"
+PSNAME="$browser"

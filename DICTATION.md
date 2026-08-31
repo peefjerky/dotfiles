@@ -36,7 +36,7 @@ Bindings in current Omarchy:
 | `voxtype-bin` | yes | Prebuilt AUR package. Confirmed as `voxtype-bin 0.7.3-1` in Omarchy issue #6029. Do **not** use the `voxtype` AUR package — it builds from source and drags in rustup/clang/cmake for no benefit. |
 | `wtype` | dep | Wayland typing backend, preferred on Hyprland |
 | `wl-clipboard` | dep | Clipboard fallback |
-| `playerctl` | yes | MPRIS auto-pause — ducks Spotify/YouTube while dictating |
+| `playerctl` | no | Not needed since voxtype 1.0.0 — MPRIS auto-pause talks D-Bus directly. Enabled via `[audio] pause_media = true`. |
 | `vulkan-icd-loader` | no | GPU is opt-in via `voxtype setup gpu`. Likely already present on CachyOS via the Mesa/NVIDIA stack. |
 | `tesseract`, `tesseract-data-eng` | yes | Only if we also want Omarchy's `Super + Ctrl + PrtScr` OCR-to-clipboard. Out of scope for v1. |
 
@@ -63,7 +63,7 @@ Hyprland keybind ──> voxtype record toggle/start/stop  (signals the daemon)
 ## 3. Phase 1 — Core install
 
 ```bash
-paru -S voxtype-bin wtype wl-clipboard playerctl
+paru -S voxtype-bin wtype wl-clipboard
 voxtype setup model                 # base.en (150MB) default; large-v3-turbo if GPU
 sudo voxtype setup gpu --enable     # Vulkan — big speedup, skip if CPU-only
 voxtype setup systemd               # user service, starts on login
@@ -245,7 +245,7 @@ threshold = 0.3          # lower = more sensitive; 0.5 default rejects quiet mic
 | `[BLANK_AUDIO]` / hallucinations on silence | Enable VAD, lower `threshold` |
 | Slow on a hybrid-GPU laptop | whisper.cpp picks the iGPU at Vulkan index 0 — set `VOXTYPE_VULKAN_DEVICE=nvidia` or `[whisper] gpu_device = 1` |
 | Style edits not applying | Restart the daemon; OSD style is resolved once at startup |
-| Audio doesn't resume after dictating | Known upstream issue (Omarchy #6029) with the playerctl/MPRIS resume path |
+| Audio doesn't resume after dictating | Fixed in voxtype 1.0.0 — the D-Bus MPRIS path replaced the playerctl shell-out that caused Omarchy #6029 |
 
 Debugging:
 

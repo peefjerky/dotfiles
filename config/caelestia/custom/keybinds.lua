@@ -106,7 +106,8 @@ end, { description = "Window: Toggle pseudo-fullscreen (client-only)" })
 -- Shell extras
 --------------------------------------------------------------------------------
 
--- Markdown notepad overlay (custom/notepad/, started by custom/notepad.lua).
+-- Markdown notepad overlay. Lives inside caelestia's shell (see
+-- ~/.config/quickshell/caelestia/modules/notepad/), which registers this shortcut.
 -- hl.dsp.global fires the GlobalShortcut registered inside the running quickshell
 -- process, so this costs no process spawn -- same mechanism caelestia uses for
 -- its own panels.

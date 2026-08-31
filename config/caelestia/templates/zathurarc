@@ -1,0 +1,110 @@
+" -----------------------------------------------------------------------------
+" Zathura settings -- rendered by caelestia from the wallpaper scheme.
+"
+" Source:  ~/.config/caelestia/templates/zathurarc
+" Output:  ~/.local/state/caelestia/theme/zathurarc
+"          (~/.config/zathura/zathurarc is a symlink to it)
+"
+" Edit the template, never the output -- the output is overwritten on every
+" scheme change. Zathura reads its config at startup only, so reopen it to
+" pick up a new wallpaper's colours.
+"
+" Transparency is awkward here. Zathura parses colours with gdk_rgba_parse,
+" which rejects #RRGGBBAA outright and falls back to opaque white -- only the
+" rgba() form carries alpha. caelestia has no alpha filter, but .rgbalpha
+" emits a literal rgba(r,g,b,255), so the postHook in cli.json rewrites that
+" fixed ",255)" tail to the alpha we want. Both lines below depend on it:
+" default-bg is what Hyprland blurs through, and recolor-lightcolor at alpha 0
+" is what makes the page itself see-through.
+" -----------------------------------------------------------------------------
+
+" Colors
+" postHook rewrites the ",255)" tail below to alpha 0.6
+set default-bg              "{{ background.rgbalpha }}"
+set default-fg              "#{{ onSurface.hex }}"
+
+set statusbar-bg            "#{{ onPrimary.hex }}"
+set statusbar-fg            "#{{ primary.hex }}"
+
+set inputbar-bg             "#{{ onPrimary.hex }}"
+set inputbar-fg             "#{{ primary.hex }}"
+
+set notification-error-bg   "#{{ onError.hex }}"
+set notification-error-fg   "#{{ error.hex }}"
+
+set notification-warning-bg "#{{ primaryFixed.hex }}"
+set notification-warning-fg "#{{ errorContainer.hex }}"
+
+set highlight-color         "#{{ primaryFixed.hex }}"
+set highlight-active-color  "#{{ primaryFixedDim.hex }}"
+
+set completion-highlight-fg "#{{ onPrimary.hex }}"
+set completion-highlight-bg "#{{ primary.hex }}"
+
+set completion-bg           "#{{ onPrimary.hex }}"
+set completion-fg           "#{{ primary.hex }}"
+
+set notification-bg         "#{{ onPrimary.hex }}"
+set notification-fg         "#{{ primary.hex }}"
+
+set recolor                 "true"
+" postHook rewrites the ",255)" tail below to alpha 0
+set recolor-lightcolor      "{{ background.rgbalpha }}"
+set recolor-darkcolor       "#{{ onSurface.hex }}"
+set recolor-reverse-video   "true"
+set recolor-keephue         "true"
+
+" Clipboard
+set selection-clipboard clipboard
+
+" Search
+set incremental-search true
+set search-hadjust true
+
+" Autoadjust
+set adjust-open width
+
+" Typography
+set font "JetBrainsMono Nerd Font Propo 12"
+
+" -----------------------------------------------------------------------------
+" Zathura mappings
+" -----------------------------------------------------------------------------
+" remove status bar
+set guioptions none
+" Zoom in/out
+map [normal]     z zoom in
+map [normal]     Z zoom out
+map [fullscreen] z zoom in
+map [fullscreen] Z zoom out
+
+" Toggle mode
+map [normal]     D toggle_page_mode
+map [fullscreen] D toggle_page_mode
+
+" Scroll
+map [normal]     u scroll half-up
+map [normal]     d scroll half-down
+map [fullscreen] u scroll half-up
+map [fullscreen] d scroll half-down
+
+" Fullscreen
+map [normal]     f toggle_fullscreen
+map [fullscreen] f toggle_fullscreen
+
+" Reload
+map [normal]     <C-r> reload
+map [fullscreen] <C-r> reload
+
+" Status bar
+map [normal]     b toggle_statusbar
+map [fullscreen] b toggle_statusbar
+
+" Set width as in mupdf
+map [normal]     H adjust_window best-fit
+map [normal]     W adjust_window width
+map [fullscreen] H adjust_window best-fit
+map [fullscreen] W adjust_window width
+
+map [normal]     i set recolor
+map [fullscreen] i set recolor

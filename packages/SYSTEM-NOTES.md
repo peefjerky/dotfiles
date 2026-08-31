@@ -25,15 +25,18 @@ Fixed 2026-08-08 with `benstaker/T2Linux-Suspend-Fix`. T2 modules must be unload
 before sleep and reloaded after, or the machine goes down and never resumes:
 
 - `t2-suspend.service` → `sleep.target.wants` — stops tiny-dfr, unloads
-  `hid_appletb_bl`, `hid_appletb_kbd`, `appletbdrm`, the sensor stack and
-  `apple_bce`, stops `t2fanrd`/`upower`/`NetworkManager`.
+  `hid_appletb_bl`, `hid_appletb_kbd`, `appletbdrm` and the sensor stack, stops
+  `t2fanrd`/`upower`/`NetworkManager`. It **no longer touches the BCE module**: the
+  `apple_bce` block was removed on 2026-08-22 when the kernel moved to `t2bce`, which
+  does its own PM. See [[T2-TUNING]] §2.
 - `t2-resume.service` → `suspend.target.wants` (+ hibernate variants) — reverses it.
 - Scripts in `/usr/local/bin/t2-*.sh`, config in `/etc/t2-suspend-fix/hardware.conf`,
   log in `/var/log/t2-suspend-fix.log`.
 - The Touch Bar returns on its own via udev re-trigger; the `bConfigurationValue`
   0→2 workaround other guides describe is **not** needed on this machine.
 - `install-apple-bce` mode was NOT used. It overwrites the module `linux-cachyos`
-  ships and rebuilds the initramfs — reserve it as an escalation.
+  ships and rebuilds the initramfs — reserve it as an escalation. Moot since 7.2.0
+  anyway: the in-tree driver is now `t2bce`, not `apple-bce`.
 
 **THE GOTCHA:** anything that suspends by writing `/sys/power/state` directly
 **bypasses systemd**, so `sleep.target` is never reached and these hooks never
@@ -97,15 +100,22 @@ they contain no local configuration, only CachyOS's curated server list.
   pulled in by `kwin`) already exposes it.
 - Wifi: NetworkManager with `wifi.backend=iwd`. `wpa_supplicant` is installed but must
   stay inactive.
-- Swap is **zram only**, so `CanHibernate` is `na`. See the caelestia suspend notes.
+- Swap is a **20G swapfile with zswap** in front of it, not zram -- a swapfile under
+  zram causes LRU inversion. Hibernate therefore works. See the caelestia suspend notes.
 
 ## Notepad overlay — depends on caelestia's private QML plugins
 
-`~/.config/caelestia/custom/notepad/` is a **separate quickshell config**, run with
-`qs -p <dir>` and started by `custom/notepad.lua`. It is separate because caelestia's
-shell has no drop-in mechanism for user QML — its `custom/` directory is Lua for
-Hyprland — so the alternative would be editing `/etc/xdg/quickshell/caelestia/`, which
-is package-owned and overwritten on every update.
+`~/.config/quickshell/caelestia/modules/notepad/` is a module **inside** caelestia's
+shell. Quickshell resolves a config name against every XDG config dir in order and
+`~/.config` wins over `/etc/xdg`, so a tree at `~/.config/quickshell/caelestia/`
+shadows the packaged one and `qs -c caelestia` loads it instead. Every entry there is
+a symlink back to the package except this module and three patched `modules/drawers/`
+files. Nothing under `/etc/xdg` is ever touched.
+
+It was standalone at first (`qs -p ~/.config/caelestia/custom/notepad`, its own layer
+surface) and moved because a separate translucent surface sat above caelestia's border
+shadow and transmitted a dark band along its bottom edge. Sharing caelestia's
+`BlobGroup` removes the seam and gets real blob merging with the launcher and sidebar.
 
 It imports two **private** caelestia plugins from `/usr/lib/qt6/qml/Caelestia/`:
 
@@ -114,10 +124,12 @@ It imports two **private** caelestia plugins from `/usr/lib/qt6/qml/Caelestia/`:
   liquid panel look
 
 Both export at version **254.0**. They are not a public API, so a `caelestia-shell`
-update can break the notepad at runtime. If it stops loading after an update, check
-`qs -p ~/.config/caelestia/custom/notepad` in a terminal first — the failure will be an
-import or property error, and the fallback is to replace `Card.qml`'s `BlobRect` with a
-plain `StyledRect`, which costs only the deformation.
+update can break the notepad at runtime. After a `caelestia-shell` upgrade re-run
+`~/.config/quickshell/caelestia/modules/notepad/install.sh`, which re-symlinks any new
+upstream files and re-applies the three patches, refusing to touch anything if they no
+longer apply. If the shell stops loading, `pkill -x qs; qs -c caelestia` in a terminal
+shows the import or property error; the fallback is to replace `Card.qml`'s `BlobRect`
+with a plain `StyledRect`, which costs only the deformation.
 
 `Tokens` and `Config` are **per-screen attached** configs. Any Item under a window that
 sets `contentItem.Tokens.screen` inherits it, but a plain QObject does not — `BlobGroup`

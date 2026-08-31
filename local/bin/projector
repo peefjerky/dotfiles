@@ -1,0 +1,274 @@
+#!/usr/bin/env python3
+"""projector -- drive Moonlight on the EO9022 from this laptop, no remote needed.
+
+The projector has no remote here, so starting and stopping a Moonlight session
+has to happen over ADB. Two things make that awkward, and this script hides both:
+
+  - Moonlight's AppView and ShortcutTrampoline are not exported, and this box's
+    shell lacks START_ANY_ACTIVITY, so `am start` can only reach PcView. Everything
+    past that is UI driving.
+  - Tapping the app tile does different things depending on whether a session is
+    already running: with none it launches, with one it opens a context menu
+    offering Resume/Quit. So we look at the screen instead of assuming.
+
+Buttons are located by their on-screen text via uiautomator, so they survive
+layout shifts. Only the app tile has no text of its own -- see APP_TILE.
+
+    projector start     # start or resume the Desktop stream
+    projector stop      # quit the session properly, then close Moonlight
+    projector status    # what Sunshine thinks is going on
+"""
+
+import re
+import subprocess
+import sys
+import time
+
+PKG = "com.limelight"
+HOST = "peefshackbook"          # the Sunshine host tile's label
+SERVICE = "app-dev.lizardbyte.app.Sunshine.service"
+
+# The app tiles are ImageViews with no text, so uiautomator can't find them by
+# name. This is the first tile ("Desktop") on the projector's 1920x1080 panel.
+# If the tile grid ever moves, this is the one number to re-measure.
+APP_TILE = (222, 305)
+
+
+def sh(*args, **kw):
+    r = subprocess.run(args, capture_output=True, text=True, **kw)
+    # adb failures used to vanish here and resurface further down as "host not
+    # on screen", which points debugging at Sunshine when the real fault is the
+    # connection. Say what actually happened instead.
+    if r.returncode != 0 and r.stderr.strip():
+        print(f"  ! {' '.join(args[:3])}: {r.stderr.strip().splitlines()[0]}")
+    return r.stdout.strip()
+
+
+def adb(*args):
+    return sh("adb", *args)
+
+
+def connect():
+    """Find the projector via mDNS rather than hardcoding an IP it may not keep."""
+    sh("adb", "start-server")
+    out = sh("avahi-browse", "-rtp", "_adb._tcp")
+    for line in out.splitlines():
+        f = line.split(";")
+        if len(f) > 8 and f[0] == "=" and f[2] == "IPv4":
+            target = f"{f[7]}:{f[8]}"
+            if "connected" in adb("connect", target):
+                print(f"  connected to {target}")
+                return True
+    print("  projector not found on mDNS.")
+    print("  It only advertises in AirPlay/network mode -- in Miracast mode it")
+    print("  leaves the network entirely and nothing can reach it.")
+    return False
+
+
+def screen():
+    """[(text, (cx, cy))] for everything on screen that has a label."""
+    adb("shell", "uiautomator", "dump", "/sdcard/u.xml")
+    xml = adb("shell", "cat", "/sdcard/u.xml")
+    out = []
+    for node in re.finditer(r"<node[^>]*>", xml):
+        t = node.group(0)
+        txt = re.search(r'text="([^"]*)"', t)
+        bnd = re.search(r'bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"', t)
+        if txt and txt.group(1).strip() and bnd:
+            x1, y1, x2, y2 = map(int, bnd.groups())
+            out.append((txt.group(1).strip(), ((x1 + x2) // 2, (y1 + y2) // 2)))
+    return out
+
+
+def find(label, items=None):
+    for text, pos in items if items is not None else screen():
+        if text.strip().lower() == label.lower():
+            return pos
+    return None
+
+
+def wait_for(label, timeout=20):
+    """Poll for a label. Returns (pos, last_screen) so the caller can report."""
+    deadline = time.time() + timeout
+    items = []
+    while time.time() < deadline:
+        items = screen()
+        pos = find(label, items)
+        if pos:
+            return pos, items
+        time.sleep(2)
+    return None, items
+
+
+def tap(pos, why=""):
+    adb("shell", "input", "tap", str(pos[0]), str(pos[1]))
+    if why:
+        print(f"  {why}")
+
+
+def open_app_menu():
+    """Get to PcView -> host -> app tile. Returns the screen after tapping it."""
+    adb("shell", "am", "start", "-n", f"{PKG}/.PcView")
+    # Poll instead of guessing a sleep: a cold PcView lists the host in ~2s, but
+    # mDNS can take longer, and a fixed wait turns "slow" into "broken".
+    host, items = wait_for(HOST)
+    if not host:
+        if not items:
+            print("  uiautomator returned an empty screen.")
+            print("  Moonlight is in .Game (a SurfaceView renders no accessibility")
+            print("  nodes), or adb dropped -- check the ! lines above.")
+        else:
+            seen = ", ".join(sorted({t for t, _ in items})[:8])
+            print(f"  '{HOST}' not on screen. Moonlight is showing: {seen}")
+            print("  So Moonlight is up but is not discovering the host. Check what")
+            print("  Sunshine advertises:  avahi-browse -aprt | grep nvstream")
+        return None
+    tap(host, f"opened {HOST}")
+    time.sleep(7)
+    tap(APP_TILE, "selected Desktop")
+    time.sleep(5)
+    return screen()
+
+
+def cmd_start():
+    # Sunshine is not enabled at login -- it only runs while casting, so bring
+    # it up first and give it a moment to register with avahi before Moonlight
+    # goes looking for the host.
+    started_here = not host_up()
+    if started_here:
+        print("  starting sunshine")
+        subprocess.run(["systemctl", "--user", "start", SERVICE])
+        time.sleep(5)
+
+    def give_up():
+        # Don't leave the host running for a session that never happened.
+        if started_here:
+            subprocess.run(["systemctl", "--user", "stop", SERVICE])
+        return 1
+
+    if not connect():
+        return give_up()
+
+    # Moonlight already in .Game means either a live stream or a stalled one.
+    # .Game is a SurfaceView with no accessibility nodes, so the UI dump comes
+    # back empty and nothing below this can find a button -- decide by looking
+    # at the wire instead of the screen.
+    if streaming_now():
+        if tx_rate() > 150:
+            print("  already streaming")
+            adb("disconnect")
+            cmd_status()
+            return 0
+        # In .Game but no data moving: usually a session left pointing at the
+        # laptop's old address after a Wi-Fi change. Restarting the client makes
+        # it re-resolve the host over mDNS.
+        print("  session stalled (no traffic) -- restarting the client")
+        adb("shell", "am", "force-stop", PKG)
+        time.sleep(3)
+
+    items = open_app_menu()
+    if items is None:
+        adb("disconnect")
+        return give_up()
+    # A context menu only appears when a session already exists.
+    resume = find("Resume Session", items)
+    if resume:
+        tap(resume, "resumed the existing session")
+    else:
+        print("  launched a new session")
+    time.sleep(12)
+    adb("disconnect")
+    cmd_status()
+    return 0
+
+
+def host_up():
+    return subprocess.run(
+        ["systemctl", "--user", "is-active", "--quiet", SERVICE]).returncode == 0
+
+
+def streaming_now():
+    """Is Moonlight in its fullscreen Game activity right now?"""
+    return ".Game" in adb("shell", "dumpsys", "activity", "activities")
+
+
+def tx_rate():
+    def read():
+        # /proc/net/dev glues the interface name to rx_bytes once that counter
+        # is wide enough ("wlan0:2618672548"), which shifts every field by one.
+        # Split on the colon rather than on whitespace.
+        with open("/proc/net/dev") as f:
+            for line in f:
+                name, _, rest = line.partition(":")
+                if name.strip() == "wlan0":
+                    return int(rest.split()[8])   # tx_bytes
+        return 0
+    a = read(); time.sleep(2); b = read()
+    return (b - a) // 2048
+
+
+def cmd_stop():
+    if not connect():
+        return 1
+
+    # While streaming, Moonlight sits in .Game and PcView is not on screen, so
+    # the Quit-Session menu is unreachable. Kill the client first in that case.
+    if streaming_now():
+        print("  stream is live -- closing the client")
+        adb("shell", "am", "force-stop", PKG)
+        time.sleep(3)
+    else:
+        items = open_app_menu()
+        if items is not None:
+            quit_btn = find("Quit Session", items)
+            if quit_btn:
+                tap(quit_btn, "quit session")
+                time.sleep(4)
+                yes = find("YES")
+                if yes:
+                    tap(yes, "confirmed")
+                    time.sleep(8)
+            else:
+                print("  no running session to quit")
+        adb("shell", "am", "force-stop", PKG)
+        time.sleep(2)
+
+    running = adb("shell", "pidof", PKG)
+    print("  Moonlight closed" if not running else f"  still running (pid {running})")
+    adb("disconnect")
+
+    # Force-stopping the client leaves Sunshine holding the session open -- it
+    # shows up later as a "Resume Session" menu entry and keeps the encoder
+    # running. Stopping the host clears that, and Sunshine is not meant to be
+    # up outside a session anyway; pairing survives (it lives in
+    # sunshine_state.json).
+    print("  stopping sunshine")
+    subprocess.run(["systemctl", "--user", "stop", SERVICE])
+    time.sleep(2)
+
+    cmd_status()
+    return 0
+
+
+def cmd_status():
+    log = sh("journalctl", "--user", "-u", SERVICE, "--since", "-10min", "--no-pager")
+    events = [l for l in log.splitlines() if "CLIENT CONNECTED" in l or "CLIENT DISCONNECTED" in l]
+    last = events[-1].split("]: Info: ")[-1] if events else "no recent session events"
+
+    rate = tx_rate()
+    print(f"  sunshine: {'active' if host_up() else 'stopped (normal when idle)'}")
+    print(f"  last event: {last}")
+    print(f"  wlan0 tx: {rate} KB/s  ({'streaming' if rate > 150 else 'idle'})")
+    return 0
+
+
+def main():
+    cmds = {"start": cmd_start, "stop": cmd_stop, "status": cmd_status}
+    if len(sys.argv) != 2 or sys.argv[1] not in cmds:
+        print(__doc__)
+        return 2
+    return cmds[sys.argv[1]]()
+
+
+if __name__ == "__main__":
+    sys.exit(main())
