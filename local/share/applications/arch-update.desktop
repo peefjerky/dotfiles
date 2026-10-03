@@ -1,0 +1,41 @@
+# Override for /usr/share/applications/arch-update.desktop -- XDG_DATA_HOME wins,
+# and arch-update-tray looks here first (the path is compiled into the binary
+# alongside XDG_DATA_HOME/XDG_DATA_DIRS).
+#
+# The shipped entry is Terminal=true with Exec=arch-update, and the tray launches
+# it through GIO. For a terminal entry GLib has to find a terminal emulator, and
+# its list in glib2 2.88.3 is: xdg-terminal-exec, ghostty, kgx, gnome-terminal,
+# mate-terminal, xfce4-terminal, tilix, konsole, nxterm, color-xterm, rxvt,
+# dtterm, xterm. kitty is not in it and none of the others are installed here, so
+# the launch forked a child that could not exec anything and died immediately --
+# which is the `[arch-update] <defunct>` zombie parented to the tray, and why
+# clicking Update appeared to do nothing at all.
+#
+# So: name the terminal ourselves and drop Terminal=true. --hold keeps the window
+# up after the run so the pacman summary is readable instead of vanishing.
+# Everything else below is the shipped entry verbatim.
+#
+# The other menu entry, "Check for updates", was never broken -- the tray runs
+# `arch-update --check` directly, which rewrites ~/.local/state/arch-update/ and
+# repaints the icon. It is silent by design, which is why it read as dead too.
+[Desktop Entry]
+Name=Cachy-Update
+Comment=An interactive update notifier & applier for CachyOS
+Comment[be]=Інтэрактыўны апавяшчальнік і ўсталёўшчык абнаўленняў для CachyOS
+Comment[bg]=Интерактивен нотификатор и инструмент за актуализиране за CachyOS
+Comment[de]=Ein interaktiver Update-Benachrichtiger und -Anwender für CachyOS
+Comment[es]=Notificador y gestor de actualizaciones para CachyOS
+Comment[eu]=CachyOSrako eguneraketa-jakinarazle eta aplikatzaile interaktiboa.
+Comment[fr]=Un notificateur & applicateur de mises à jour interactif pour CachyOS
+Comment[it]=Un sistema interattivo di notifica & applicazione degli aggiornamenti per CachyOS
+Comment[ja]=CachyOS 用の対話式アップデート通知 & 適用システム
+Comment[ka]=ინტერაქტიური განახლებების შეტყობინება და გადატარება CachyOS-ისთვის
+Comment[nb]=En interaktiv oppdateringsvarsler og -gjennomfører for CachyOS
+Comment[ru]=Интерактивный помощник по обновлению CachyOS: уведомляет об обновлениях и устанавливает их
+Comment[tr]=CachyOS için etkileşimli bir güncelleme bildiricisi ve uygulayıcısı
+Comment[zh_CN]=CachyOS 的交互式更新通知 & 应用工具
+Icon=cachy-update-blue
+Type=Application
+Terminal=false
+Exec=kitty --class cachy-update --title Cachy-Update --hold arch-update
+Categories=Utility
