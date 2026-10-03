@@ -28,21 +28,6 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("hyprpm reload -n")
 end)
 
--- dynamic-cursors: shake-to-find magnifies 4x by default. With hyprcursor
--- resolution = -1 the magnified texture is loaded at [cursor size] * [base],
--- so 4x asks for 160px and overshoots what stays clean -- hence the pixelation.
--- 3x keeps it sharp. Everything else is left at plugin defaults (mode = "tilt").
--- nearest = 0 forces smooth scaling instead of nearest-neighbour, which is the
--- direct fix for the pixelation; base = 3.0 just reduces how far it has to scale.
-hl.config({
-    plugin = {
-        dynamic_cursors = {
-            shake = { base = 4.0, threshold = 4.0, speed = 6.0, limit = 3.0  },
-            hyprcursor = { nearest = 0 },
-        },
-    },
-})
-
 require("custom.rules")
 require("custom.input")
 require("custom.scrolling")

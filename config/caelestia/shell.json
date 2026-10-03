@@ -70,7 +70,7 @@
         "networkRescanInterval": 40000
     },
     "services": {
-        "useTwelveHourClock": false
+        "clockFormat": "TwentyFourHour"
     },
     "session": {
         "commands": {
