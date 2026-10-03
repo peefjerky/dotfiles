@@ -1,10 +1,11 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 import Caelestia.Config
 import qs.components
+import qs.components.containers
+import qs.components.controls
 import qs.services
 import qs.modules.notepad.services
 
@@ -46,7 +47,9 @@ Item {
         detail: !Dict.installed ? "Run: yay -S --needed sdcv stardict-wordnet" : search.text.length ? "" : "Select a word anywhere in the note and press Ctrl+D to look it up here."
     }
 
-    Flickable {
+    VerticalFadeFlickable {
+        id: entryView
+
         anchors.top: search.bottom
         anchors.left: parent.left
         anchors.right: parent.right
@@ -58,8 +61,11 @@ Item {
         clip: true
         boundsBehavior: Flickable.StopAtBounds
         visible: Dict.entries.length > 0
+        fadeAmount: 0.06
 
-        ScrollBar.vertical: ScrollBar {}
+        StyledScrollBar.vertical: StyledScrollBar {
+            flickable: entryView
+        }
 
         ColumnLayout {
             id: entry

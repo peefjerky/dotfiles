@@ -20,9 +20,18 @@ TextField {
 
     required property string hint
 
+    // Arrow keys drive the list under the field while focus stays here, so a
+    // tab is search-type-Enter without ever reaching for the mouse. Enter is
+    // TextField's own `accepted`.
+    signal moveUp
+    signal moveDown
+
     implicitHeight: 44
-    leftPadding: Tokens.padding.medium
+    leftPadding: Tokens.padding.medium + icon.implicitWidth + Tokens.spacing.small
     rightPadding: Tokens.padding.medium
+
+    Keys.onUpPressed: moveUp()
+    Keys.onDownPressed: moveDown()
 
     placeholderText: hint
     placeholderTextColor: Colours.palette.m3outline
@@ -39,6 +48,22 @@ TextField {
         border.color: root.activeFocus ? Colours.palette.m3primary : "transparent"
 
         Behavior on border.color {
+            CAnim {}
+        }
+    }
+
+    MaterialIcon {
+        id: icon
+
+        anchors.left: parent.left
+        anchors.leftMargin: Tokens.padding.medium
+        anchors.verticalCenter: parent.verticalCenter
+
+        text: "search"
+        color: root.activeFocus ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+        fontStyle: Tokens.font.icon.small
+
+        Behavior on color {
             CAnim {}
         }
     }

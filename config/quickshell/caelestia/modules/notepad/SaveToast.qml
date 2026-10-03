@@ -4,9 +4,10 @@ import qs.components
 import qs.services
 import qs.modules.notepad.services
 
-// Transient confirmation for the Save button. Driven by Store's signals rather
-// than by the click, because FileView writes are asynchronous -- reporting success
-// on the click would be reporting it before the file exists.
+// Transient confirmation. For export it is driven by Store's signals rather than
+// by the click, because FileView writes are asynchronous -- reporting success on
+// the click would be reporting it before the file exists. Everything else (a copy,
+// mostly) arrives through NotepadState.toast.
 StyledRect {
     id: root
 
@@ -48,18 +49,29 @@ StyledRect {
     }
 
     Connections {
+        target: NotepadState
+
+        function onToast(message: string): void {
+            root.failed = false;
+            root.message = message;
+            root.shown = 1;
+            hideTimer.restart();
+        }
+    }
+
+    Connections {
         target: Store
 
         function onExported(path: string): void {
             root.failed = false;
-            root.message = `Saved to ${path.replace(Store.home, "~")}`;
+            root.message = `Exported to ${path.replace(Store.home, "~")}`;
             root.shown = 1;
             hideTimer.restart();
         }
 
         function onExportFailed(reason: string): void {
             root.failed = true;
-            root.message = `Save failed: ${reason}`;
+            root.message = `Export failed: ${reason}`;
             root.shown = 1;
             hideTimer.restart();
         }

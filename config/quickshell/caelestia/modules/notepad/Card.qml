@@ -13,25 +13,19 @@ import qs.modules.notepad.services
 Item {
     id: root
 
-    // 0 note, 1 clipboard, 2 colours, 3 files, 4 dictionary, 5 projects,
-    // 6 emoji. Ctrl+1..7, or the tabs.
-    property int mode
-
-    property bool rawMode
+    // Live in NotepadState, so they outlive this Card (it is torn down with the
+    // panel's Loader on close). Ctrl+1..7, the rail, or `ipc call notepad mode`.
+    readonly property int mode: NotepadState.mode
+    readonly property bool rawMode: NotepadState.rawMode
 
     property real rawProgress: rawMode ? 1 : 0
-
-    // The note tab's share of the cross-fade, kept separate from rawProgress so the
-    // two compose by multiplication instead of fighting. A single `mode === 0 ? … : 0`
-    // with a Behavior on top would be a Behavior chasing an already-animating value:
-    // it lags a whole curve and rubber-bands. Without it, tabbing back to the note
-    // snapped in while every other tab cross-faded.
-    property real notePresence: mode === 0 ? 1 : 0
 
     // Whatever is selected in whichever editor is live, for the dictionary.
     readonly property string selection: rawMode ? editor.selection : rendered.selection
 
-    signal requestMode(index: int)
+    function requestMode(i: int): void {
+        NotepadState.mode = i;
+    }
 
     function focusDict(seed: string): void {
         dict.focusSearch(seed);
@@ -41,15 +35,42 @@ Item {
         Store.exportSnapshot();
     }
 
+    // Put the keyboard where the tab's work is: the search field on every list
+    // tab, the editor on the note. Switching tabs and typing is then one motion.
+    function focusCurrent(): void {
+        if (mode === 0 && rawMode)
+            editor.focusEditor();
+        else if (mode === 0)
+            rendered.forceActiveFocus();
+        else if (mode === 4)
+            dict.focusSearch("");
+        else if ([1, 3, 5, 6].includes(mode))
+            [null, clipboard, null, files, null, projects, emoji][mode].focusSearch();
+        else
+            root.forceActiveFocus();
+    }
+
+    onModeChanged: {
+        if (mode === 1)
+            Clip.refresh();
+        else if (mode === 5)
+            Projects.refresh();
+        else if (mode === 6)
+            Emoji.load();
+        focusCurrent();
+    }
+
+    Component.onCompleted: {
+        // Opening straight onto a list tab still needs its data.
+        if (mode !== 0)
+            modeChanged();
+        else
+            focusCurrent();
+    }
+
     // An Effects curve, not a Spatial one: this is a pure opacity cross-fade with
     // no movement, which is the distinction caelestia draws between the two sets.
     Behavior on rawProgress {
-        Anim {
-            type: Anim.DefaultEffects
-        }
-    }
-
-    Behavior on notePresence {
         Anim {
             type: Anim.DefaultEffects
         }
@@ -67,8 +88,7 @@ Item {
             to.contentY = fraction * Math.max(0, to.contentHeight - to.height);
         });
 
-        if (rawMode)
-            editor.focusEditor();
+        focusCurrent();
     }
 
     // Swallow clicks so they don't reach caelestia's Interactions layer underneath,
@@ -77,10 +97,12 @@ Item {
         anchors.fill: parent
     }
 
-    // The rail is chrome and runs edge to edge; only the content is inset.
+    // The rail is chrome and runs edge to edge; only the content is inset. Above
+    // the content so its tooltips are not painted over.
     Tabs {
         id: rail
 
+        z: 1
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.bottom: parent.bottom
@@ -95,15 +117,18 @@ Item {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.margins: Tokens.padding.extraLarge
+        anchors.bottomMargin: Tokens.padding.large
 
-        spacing: Tokens.spacing.medium
+        spacing: Tokens.spacing.large
 
         Header {
+            // Above the views, so its tooltips are too.
+            z: 1
             Layout.fillWidth: true
             rawMode: root.rawMode
             mode: root.mode
 
-            onToggleMode: root.rawMode = !root.rawMode
+            onToggleMode: NotepadState.rawMode = !NotepadState.rawMode
             onRequestSave: root.save()
         }
 
@@ -111,94 +136,90 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            RenderedView {
-                id: rendered
+            Pane {
+                index: 0
 
-                anchors.fill: parent
-                source: Store.content
-                opacity: root.notePresence * (1 - root.rawProgress)
-                visible: opacity > 0
-            }
+                RenderedView {
+                    id: rendered
 
-            RawEditor {
-                id: editor
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    source: Store.content
+                    opacity: 1 - root.rawProgress
+                    visible: opacity > 0
+                }
 
-                anchors.fill: parent
-                opacity: root.notePresence * root.rawProgress
-                visible: opacity > 0
-            }
+                RawEditor {
+                    id: editor
 
-            ClipboardView {
-                anchors.fill: parent
-                opacity: root.mode === 1 ? 1 : 0
-                visible: opacity > 0
-
-                Behavior on opacity {
-                    Anim {
-                        type: Anim.DefaultEffects
-                    }
+                    // Same column as the rendered view, so the text sits in one
+                    // place while the two cross-fade.
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.left: parent.left
+                    width: rendered.measure + Tokens.padding.large
+                    opacity: root.rawProgress
+                    visible: opacity > 0
                 }
             }
 
-            ColourView {
-                anchors.fill: parent
-                opacity: root.mode === 2 ? 1 : 0
-                visible: opacity > 0
+            Pane {
+                index: 1
 
-                Behavior on opacity {
-                    Anim {
-                        type: Anim.DefaultEffects
-                    }
+                ClipboardView {
+                    id: clipboard
+
+                    anchors.fill: parent
                 }
             }
 
-            FilesView {
-                anchors.fill: parent
-                opacity: root.mode === 3 ? 1 : 0
-                visible: opacity > 0
+            Pane {
+                index: 2
 
-                Behavior on opacity {
-                    Anim {
-                        type: Anim.DefaultEffects
-                    }
+                ColourView {
+                    anchors.fill: parent
                 }
             }
 
-            ProjectsView {
-                anchors.fill: parent
-                opacity: root.mode === 5 ? 1 : 0
-                visible: opacity > 0
+            Pane {
+                index: 3
 
-                Behavior on opacity {
-                    Anim {
-                        type: Anim.DefaultEffects
-                    }
+                FilesView {
+                    id: files
+
+                    anchors.fill: parent
                 }
             }
 
-            EmojiView {
-                anchors.fill: parent
-                opacity: root.mode === 6 ? 1 : 0
-                visible: opacity > 0
+            Pane {
+                index: 4
 
-                Behavior on opacity {
-                    Anim {
-                        type: Anim.DefaultEffects
-                    }
+                DictView {
+                    id: dict
+
+                    anchors.fill: parent
                 }
             }
 
-            DictView {
-                id: dict
+            Pane {
+                index: 5
 
-                anchors.fill: parent
-                opacity: root.mode === 4 ? 1 : 0
-                visible: opacity > 0
+                ProjectsView {
+                    id: projects
 
-                Behavior on opacity {
-                    Anim {
-                        type: Anim.DefaultEffects
-                    }
+                    anchors.fill: parent
+                }
+            }
+
+            Pane {
+                index: 6
+
+                EmojiView {
+                    id: emoji
+
+                    anchors.fill: parent
                 }
             }
         }
@@ -208,5 +229,42 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
         anchors.bottomMargin: Tokens.padding.extraLarge
+    }
+
+    // One view per tab. The incoming pane rises from the side of the rail it sits
+    // on and the outgoing one leaves toward the other, so the content moves the
+    // way the indicator does -- down the rail, the content scrolls up. 10px and
+    // the short standard curve: it orients, it does not perform, because tab
+    // switches are constant and half come from the keyboard.
+    //
+    // The exit is the faster half. Two panes at equal opacity mid-switch read as
+    // a double exposure; leaving quickly means the overlap is mostly the new one.
+    component Pane: Item {
+        id: pane
+
+        required property int index
+
+        readonly property bool current: root.mode === index
+
+        anchors.fill: parent
+        opacity: current ? 1 : 0
+        visible: opacity > 0
+        enabled: current
+
+        transform: Translate {
+            y: pane.current ? 0 : pane.index > root.mode ? 10 : -10
+
+            Behavior on y {
+                Anim {
+                    type: Anim.StandardSmall
+                }
+            }
+        }
+
+        Behavior on opacity {
+            Anim {
+                type: pane.current ? Anim.DefaultEffects : Anim.FastEffects
+            }
+        }
     }
 }

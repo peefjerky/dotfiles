@@ -19,7 +19,7 @@
 #   ./install.sh --revert    move the shadow tree aside; caelestia falls back to
 #                            the packaged config
 #
-# After installing, restart the shell:  pkill -x qs; qs -c caelestia -n -d
+# After installing, restart the shell:  qs kill -c caelestia; qs -c caelestia -n -d
 
 set -uo pipefail
 
@@ -230,7 +230,7 @@ install_mod() {
     # dir and parsed the result. Repeating it would only re-run the same test.
 
     echo
-    green "done. restart the shell:  pkill -x qs; qs -c caelestia -n -d"
+    green "done. restart the shell:  qs kill -c caelestia; qs -c caelestia -n -d"
 }
 
 # ------------------------------------------------------------------- revert ---
@@ -240,7 +240,7 @@ revert() {
     local off=$TARGET.off-$(date +%Y%m%d-%H%M%S)
     mv "$TARGET" "$off"
     green "moved aside: $off"
-    echo "caelestia now loads $UPSTREAM. Restart: pkill -x qs; qs -c caelestia -n -d"
+    echo "caelestia now loads $UPSTREAM. Restart: qs kill -c caelestia; qs -c caelestia -n -d"
 }
 
 # --------------------------------------------------------------------- main ---

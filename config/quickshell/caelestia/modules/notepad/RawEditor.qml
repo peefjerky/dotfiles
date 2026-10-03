@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import Caelestia.Config
 import qs.components
+import qs.components.controls
 import qs.services
 import qs.modules.notepad.services
 
@@ -37,6 +38,9 @@ Flickable {
         placeholderText: "Write markdown…"
         placeholderTextColor: Colours.palette.m3outline
         background: null
+        // Flush with the rendered view's text, so Ctrl+E doesn't shift the column.
+        leftPadding: 0
+        topPadding: 0
 
         ContextMenu.menu: EditMenu {
             target: area
@@ -52,5 +56,7 @@ Flickable {
         }
     }
 
-    ScrollBar.vertical: ScrollBar {}
+    StyledScrollBar.vertical: StyledScrollBar {
+        flickable: root
+    }
 }

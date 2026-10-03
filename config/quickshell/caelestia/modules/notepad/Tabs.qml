@@ -59,7 +59,10 @@ Item {
     }
 
     // One indicator that slides, so the change of tab is the motion rather than
-    // two separate fades.
+    // two separate fades. Tab switches are the most frequent thing done here,
+    // half of them from Ctrl+N, so this is the short standard curve with no
+    // overshoot -- the expressive spatial curve it used to run bounced for half
+    // a second on every switch.
     StyledRect {
         id: pill
 
@@ -72,15 +75,17 @@ Item {
         color: Colours.tPalette.m3primaryContainer
 
         Behavior on y {
-            Anim {}
+            Anim {
+                type: Anim.StandardSmall
+            }
         }
     }
 
     Repeater {
         model: root.tabs
 
-        MaterialIcon {
-            id: icon
+        Item {
+            id: tab
 
             required property int index
             required property var modelData
@@ -89,23 +94,47 @@ Item {
 
             x: (root.implicitWidth - width) / 2
             y: root.topInset + index * root.slot + (root.slot - height) / 2
+            width: 44
+            height: 44
 
-            text: modelData.icon
-            color: active ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurfaceVariant
-            fontStyle: Tokens.font.icon.small
+            // Hover is the 8% state layer, on the same circle the pill fills, so
+            // a hovered tab previews exactly where the indicator would land.
+            StyledRect {
+                anchors.fill: parent
+                radius: Tokens.rounding.full
+                color: "transparent"
 
-            Behavior on color {
-                CAnim {}
+                StateLayer {
+                    id: hover
+
+                    onClicked: root.selected(tab.index)
+                }
             }
 
-            MouseArea {
+            MaterialIcon {
                 anchors.centerIn: parent
 
-                width: root.implicitWidth
-                height: root.slot
+                text: tab.modelData.icon
+                // Filled when active: the M3 rail's own active-state signal, so
+                // the current tab reads even where the pill colour is subtle.
+                fill: tab.active ? 1 : 0
+                color: tab.active ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurfaceVariant
+                fontStyle: Tokens.font.icon.small
 
-                cursorShape: Qt.PointingHandCursor
-                onClicked: root.selected(icon.index)
+                Behavior on color {
+                    CAnim {}
+                }
+            }
+
+            Tip {
+                anchors.left: parent.right
+                anchors.leftMargin: Tokens.spacing.medium
+                anchors.verticalCenter: parent.verticalCenter
+
+                hovered: hover.containsMouse
+                text: tab.modelData.name
+                shortcut: `Ctrl+${tab.index + 1}`
+                origin: Item.Left
             }
         }
     }

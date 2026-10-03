@@ -1,14 +1,20 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Controls
 import Caelestia.Config
 import qs.components
+import qs.components.containers
+import qs.components.controls
 import qs.services
 import qs.modules.notepad.services
 
 Item {
     id: root
+
+    function focusSearch(): void {
+        search.forceActiveFocus();
+        search.selectAll();
+    }
 
     SearchBox {
         id: search
@@ -20,6 +26,9 @@ Item {
         hint: "Find a file under ~"
 
         onTextChanged: Files.search(text)
+        onMoveUp: list.decrementCurrentIndex()
+        onMoveDown: list.incrementCurrentIndex()
+        onAccepted: if (list.currentIndex >= 0 && Files.results.length) Files.open(Files.results[list.currentIndex].path)
     }
 
     EmptyState {
@@ -32,7 +41,9 @@ Item {
         detail: search.text.length < 2 ? "Type at least two characters. Enter opens it, right-click reveals the folder." : ""
     }
 
-    ListView {
+    VerticalFadeListView {
+        id: list
+
         anchors.top: search.bottom
         anchors.left: parent.left
         anchors.right: parent.right
@@ -45,7 +56,17 @@ Item {
         cacheBuffer: 0
         boundsBehavior: Flickable.StopAtBounds
 
-        ScrollBar.vertical: ScrollBar {}
+        // The Enter target. Keyboard-driven, so it jumps rather than glides.
+        highlightMoveDuration: 0
+        highlightResizeDuration: 0
+        highlight: StyledRect {
+            radius: Tokens.rounding.medium
+            color: Colours.tPalette.m3surfaceContainerHigh
+        }
+
+        StyledScrollBar.vertical: StyledScrollBar {
+            flickable: list
+        }
 
         delegate: StyledRect {
             id: row

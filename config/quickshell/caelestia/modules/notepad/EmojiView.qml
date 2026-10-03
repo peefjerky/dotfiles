@@ -1,14 +1,25 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Controls
 import Caelestia.Config
 import qs.components
+import qs.components.containers
+import qs.components.controls
 import qs.services
 import qs.modules.notepad.services
 
 Item {
     id: root
+
+    function focusSearch(): void {
+        search.forceActiveFocus();
+        search.selectAll();
+    }
+
+    function copy(glyph: string): void {
+        Emoji.copy(glyph);
+        NotepadState.toast(`Copied ${glyph}`);
+    }
 
     SearchBox {
         id: search
@@ -20,6 +31,9 @@ Item {
         hint: "Search emoji and symbols…"
 
         onTextChanged: Emoji.filter = text
+        onMoveUp: list.moveCurrentIndexUp()
+        onMoveDown: list.moveCurrentIndexDown()
+        onAccepted: if (list.currentIndex >= 0 && Emoji.shown.length) root.copy(Emoji.shown[list.currentIndex].glyph)
     }
 
     EmptyState {
@@ -29,10 +43,12 @@ Item {
         visible: Emoji.shown.length === 0
         icon: "mood"
         title: Emoji.loaded ? "Nothing matched" : "Loading…"
-        detail: Emoji.loaded ? "Search by name — try \"arrow\", \"check\" or \"fire\". Click to copy." : ""
+        detail: Emoji.loaded ? "Search by name, like \"arrow\", \"check\" or \"fire\". Enter or a click copies it." : ""
     }
 
     GridView {
+        id: list
+
         anchors.top: search.bottom
         anchors.left: parent.left
         anchors.right: parent.right
@@ -46,7 +62,17 @@ Item {
         cacheBuffer: 0
         boundsBehavior: Flickable.StopAtBounds
 
-        ScrollBar.vertical: ScrollBar {}
+
+        // The Enter target. Keyboard-driven, so it jumps rather than glides.
+        highlightMoveDuration: 0
+        highlight: StyledRect {
+            radius: Tokens.rounding.medium
+            color: Colours.tPalette.m3surfaceContainerHigh
+        }
+
+        StyledScrollBar.vertical: StyledScrollBar {
+            flickable: list
+        }
 
         delegate: Item {
             id: cell
@@ -74,7 +100,7 @@ Item {
                     id: cellHover
 
                     radius: parent.radius
-                    onClicked: Emoji.copy(cell.modelData.glyph)
+                    onClicked: root.copy(cell.modelData.glyph)
                 }
 
                 // Tucked into the corner rather than centred, so it never hides

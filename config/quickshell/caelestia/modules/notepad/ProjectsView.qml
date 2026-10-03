@@ -1,14 +1,20 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Controls
 import Caelestia.Config
 import qs.components
+import qs.components.containers
+import qs.components.controls
 import qs.services
 import qs.modules.notepad.services
 
 Item {
     id: root
+
+    function focusSearch(): void {
+        search.forceActiveFocus();
+        search.selectAll();
+    }
 
     property string filter
 
@@ -24,6 +30,9 @@ Item {
         hint: "Filter projects…"
 
         onTextChanged: root.filter = text
+        onMoveUp: list.decrementCurrentIndex()
+        onMoveDown: list.incrementCurrentIndex()
+        onAccepted: if (list.currentIndex >= 0 && root.shown.length) Projects.terminal(root.shown[list.currentIndex].path)
     }
 
     EmptyState {
@@ -33,10 +42,12 @@ Item {
         visible: root.shown.length === 0
         icon: "folder_code"
         title: Projects.busy ? "Scanning…" : "No repos found"
-        detail: "Git repositories under ~/Projects appear here. Click opens a terminal there, right-click opens the folder."
+        detail: "Git repositories under ~/Projects appear here. Enter or a click opens a terminal there, right-click opens the folder."
     }
 
-    ListView {
+    VerticalFadeListView {
+        id: list
+
         anchors.top: search.bottom
         anchors.left: parent.left
         anchors.right: parent.right
@@ -49,7 +60,17 @@ Item {
         cacheBuffer: 0
         boundsBehavior: Flickable.StopAtBounds
 
-        ScrollBar.vertical: ScrollBar {}
+        // The Enter target. Keyboard-driven, so it jumps rather than glides.
+        highlightMoveDuration: 0
+        highlightResizeDuration: 0
+        highlight: StyledRect {
+            radius: Tokens.rounding.medium
+            color: Colours.tPalette.m3surfaceContainerHigh
+        }
+
+        StyledScrollBar.vertical: StyledScrollBar {
+            flickable: list
+        }
 
         delegate: StyledRect {
             id: row
@@ -100,8 +121,10 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.rightMargin: Tokens.padding.medium
 
+                // A bare number in a pill said nothing; it is the count of files
+                // with uncommitted changes, so it says so.
                 visible: row.modelData.dirty > 0
-                implicitWidth: Math.max(26, dirtyLabel.implicitWidth + Tokens.padding.small * 2)
+                implicitWidth: dirtyLabel.implicitWidth + Tokens.padding.medium * 2
                 implicitHeight: 24
                 radius: Tokens.rounding.full
                 color: Colours.palette.m3primaryContainer
@@ -110,7 +133,7 @@ Item {
                     id: dirtyLabel
 
                     anchors.centerIn: parent
-                    text: row.modelData.dirty
+                    text: `${row.modelData.dirty} uncommitted`
                     font: Tokens.font.label.small
                     color: Colours.palette.m3onPrimaryContainer
                 }

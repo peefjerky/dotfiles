@@ -124,16 +124,6 @@ Item {
         sourceComponent: Card {
             id: card
 
-            onRequestMode: i => {
-                card.mode = i;
-                if (i === 1)
-                    Clip.refresh();
-                else if (i === 5)
-                    Projects.refresh();
-                else if (i === 6)
-                    Emoji.load();
-            }
-
             Shortcut {
                 sequence: "Escape"
                 enabled: root.shouldBeActive
@@ -143,7 +133,7 @@ Item {
             Shortcut {
                 sequence: "Ctrl+E"
                 enabled: root.shouldBeActive
-                onActivated: card.rawMode = !card.rawMode
+                onActivated: NotepadState.rawMode = !NotepadState.rawMode
             }
 
             Shortcut {
@@ -156,8 +146,10 @@ Item {
                 sequence: "Ctrl+D"
                 enabled: root.shouldBeActive
                 onActivated: {
+                    // Read before switching: the selection belongs to the note.
+                    const seed = card.selection;
                     card.requestMode(4);
-                    card.focusDict(card.selection);
+                    card.focusDict(seed);
                 }
             }
 

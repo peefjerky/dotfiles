@@ -17,7 +17,8 @@ land automatically. Only these are real files:
 | `modules/drawers/Panels.qml` | **patched** — instantiates the notepad panel |
 | `modules/drawers/Regions.qml` | **patched** — adds the notepad to the input mask |
 
-Scriptable: `qs -c caelestia ipc call notepad {toggle,open,close,isOpen,save,get,set}`.
+Scriptable: `qs -c caelestia ipc call notepad {toggle,open,close,isOpen,save,get,set,mode,raw}`.
+`mode` takes a tab name or its Ctrl+N number (`mode clipboard`, `mode 2`).
 
 ## Why the notepad lives here rather than in its own Quickshell config
 
@@ -44,7 +45,7 @@ safe to run at any time — running it twice changes nothing:
 ~/.config/quickshell/caelestia/modules/notepad/install.sh --check   # verify only
 ~/.config/quickshell/caelestia/modules/notepad/install.sh           # verify, then install
 ~/.config/quickshell/caelestia/modules/notepad/install.sh --revert  # move the tree aside
-pkill -x qs; qs -c caelestia -n -d                                  # restart the shell
+qs kill -c caelestia; qs -c caelestia -n -d                                  # restart the shell
 ```
 
 A `caelestia-shell` upgrade replaces `/etc/xdg` only, so `modules/notepad/` always
@@ -97,7 +98,7 @@ visible fraction, exactly like the launcher's. Without it the panel is not click
 
 ```sh
 ~/.config/quickshell/caelestia/modules/notepad/install.sh --revert
-pkill -x qs; qs -c caelestia -n -d
+qs kill -c caelestia; qs -c caelestia -n -d
 ```
 
 Caelestia falls straight back to the packaged config. The notepad disappears; nothing

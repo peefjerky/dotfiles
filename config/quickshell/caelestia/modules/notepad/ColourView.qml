@@ -116,7 +116,10 @@ Item {
 
                     StateLayer {
                         radius: parent.radius
-                        onClicked: Picker.copy(cell.modelData)
+                        onClicked: {
+                            Picker.copy(cell.modelData);
+                            NotepadState.toast(`Copied ${cell.modelData}`);
+                        }
                     }
                 }
             }

@@ -31,6 +31,11 @@ Singleton {
 
     property string pendingExportPath
 
+    // True from the first keystroke until the debounced write lands, for the
+    // header's "Saving…" / "Saved". Autosave is otherwise invisible, and a scratch
+    // pad you cannot see persisting is one you stop trusting.
+    readonly property bool pending: saveTimer.running || writingOwnChange
+
     signal exported(path: string)
     signal exportFailed(reason: string)
 
