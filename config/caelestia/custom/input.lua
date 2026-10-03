@@ -37,8 +37,21 @@
 -- decided by hid-apple's swap_opt_cmd (see system/modprobe.d/hid_apple.conf),
 -- not by xkb -- no layout puts Command and Option in different places.
 
+-- Mouse wheel direction. caelestia sets natural_scroll on the TOUCHPAD only
+-- (hyprland/input.lua), leaving input:natural_scroll at its default of false --
+-- so an external mouse scrolls the opposite way to the trackpad on the same
+-- machine. This is the top-level pointer setting and covers everything that is
+-- not a touchpad, which makes the mouse match both the trackpad and macOS.
+--
+-- natural_scroll is a libinput-level setting, so the axis is already inverted by
+-- the time Hyprland dispatches keybinds. Every wheel bind flips with it -- the
+-- SUPER wheel workspace binds and the SUPER+SHIFT column scrub in
+-- custom/keybinds.lua included -- which is what keeps the whole thing coherent
+-- rather than needing each bind reversed by hand.
 hl.config({
     input = {
+        natural_scroll = true,
+
         kb_layout  = "in",
         kb_variant = "eng",
 

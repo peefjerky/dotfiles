@@ -46,6 +46,19 @@ hl.bind("SUPER + ALT + Comma", hl.dsp.layout("move -col"),
 hl.bind("SUPER + ALT + Period", hl.dsp.layout("move +col"),
     { repeating = true, description = "Scrolling: Scroll view right (alias)" })
 
+-- Same action on the scroll wheel. SUPER+SHIFT is the only free wheel modifier
+-- left: caelestia already owns SUPER (prev/next workspace), CTRL+SUPER
+-- (workspace group) and SUPER+ALT (move window to workspace) -- modmasks 64, 68
+-- and 72 against `hyprctl binds -j`, so this one lands on 65.
+--
+-- Direction follows caelestia's own wheel convention from variables.lua:75-80,
+-- mouse_down = next/right and mouse_up = prev/left. No `repeating` flag -- that
+-- is for held keys, and each wheel click is already a discrete press event.
+hl.bind("SUPER + SHIFT + mouse_up", hl.dsp.layout("move -col"),
+    { description = "Scrolling: Scroll view left (wheel)" })
+hl.bind("SUPER + SHIFT + mouse_down", hl.dsp.layout("move +col"),
+    { description = "Scrolling: Scroll view right (wheel)" })
+
 -- Resize the focused column
 hl.bind("SUPER + ALT + BracketLeft", hl.dsp.layout("colresize -0.1"),
     { repeating = true, description = "Scrolling: Shrink column" })
