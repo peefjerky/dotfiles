@@ -17,8 +17,10 @@ land automatically. Only these are real files:
 | `modules/drawers/Panels.qml` | **patched** — instantiates the notepad panel |
 | `modules/drawers/Regions.qml` | **patched** — adds the notepad to the input mask |
 
-Scriptable: `qs -c caelestia ipc call notepad {toggle,open,close,isOpen,save,get,set,mode,raw}`.
-`mode` takes a tab name or its Ctrl+N number (`mode clipboard`, `mode 2`).
+Scriptable: `qs -c caelestia ipc call notepad {toggle,open,close,isOpen,save,get,set,mode,raw,define}`.
+`mode` takes a tab name or its Ctrl+N number (`mode clipboard`, `mode 2`); `define <word>`
+opens the dictionary tab on it. SUPER+SHIFT+D does the same with whatever is highlighted
+in any app (the Wayland primary selection).
 
 ## Why the notepad lives here rather than in its own Quickshell config
 

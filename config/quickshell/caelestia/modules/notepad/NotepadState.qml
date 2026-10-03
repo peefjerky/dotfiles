@@ -29,6 +29,11 @@ Singleton {
     property int mode
     property bool rawMode
 
+    // A word waiting for the dictionary tab. Card consumes it, either at once if
+    // the panel is up or when it next loads; empty means nothing pending.
+    property string lookupWord
+    signal lookupRequested
+
     // Tooltips show instantly until this time (see Tip.qml).
     property real tipWarmUntil
 
@@ -40,6 +45,39 @@ Singleton {
 
     function toggle(): void {
         root.open = !root.open;
+    }
+
+    // Open the dictionary tab on `word`. Trimmed to the word itself: a double-
+    // click selection drags in surrounding punctuation, and a drag across a line
+    // break brings the newline. An empty word still opens the tab, search focused.
+    function define(word: string): void {
+        // An explicit punctuation set: Qt's JS engine silently ignores \p{L}.
+        const edge = /^[\s"'“”‘’«»„.,;:!?¡¿()\[\]{}<>…—–\-*_`~|\/\\]+|[\s"'“”‘’«»„.,;:!?¡¿()\[\]{}<>…—–\-*_`~|\/\\]+$/g;
+        root.lookupWord = word.replace(/\s+/g, " ").replace(edge, "").slice(0, 64);
+        root.mode = 4;
+        root.open = true;
+        root.lookupRequested();
+    }
+
+    // Highlighting text anywhere sets the Wayland primary selection, so "the
+    // word under your selection" is just that -- no copy step, the clipboard is
+    // left alone. `-t text` skips image selections; no selection exits non-zero
+    // and lands here as an empty string, which still opens the tab.
+    Process {
+        id: readSelection
+
+        command: ["wl-paste", "--primary", "--no-newline", "--type", "text"]
+        stdout: StdioCollector {
+            onStreamFinished: root.define(text)
+        }
+    }
+
+    GlobalShortcut {
+        appid: "notepad"
+        name: "define"
+        description: "Look up the highlighted word in the dictionary"
+
+        onPressed: readSelection.running = true
     }
 
     GlobalShortcut {
@@ -83,6 +121,10 @@ Singleton {
 
         function raw(on: bool): void {
             root.rawMode = on;
+        }
+
+        function define(word: string): void {
+            root.define(word);
         }
 
         // Works whether or not the panel is open -- the buffer lives in Store,

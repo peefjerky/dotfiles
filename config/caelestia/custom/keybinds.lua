@@ -126,6 +126,11 @@ end, { description = "Window: Toggle pseudo-fullscreen (client-only)" })
 -- its own panels.
 hl.bind("SUPER + G", hl.dsp.global("notepad:toggle"), { description = "Toggle markdown notepad" })
 
+-- Define the highlighted word. Works from any app: highlighting sets the Wayland
+-- primary selection, which the notepad reads and looks up in its dictionary tab
+-- (sdcv + WordNet, offline). The clipboard is not touched.
+hl.bind("SUPER + SHIFT + D", hl.dsp.global("notepad:define"), { description = "Define the highlighted word" })
+
 --------------------------------------------------------------------------------
 -- Hardware backlights (MacBookPro16,2)
 --------------------------------------------------------------------------------

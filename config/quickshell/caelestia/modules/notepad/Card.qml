@@ -60,12 +60,29 @@ Item {
         focusCurrent();
     }
 
+    // A word sent by SUPER+SHIFT+D (NotepadState.define).
+    function takeLookup(): void {
+        if (!NotepadState.lookupWord)
+            return;
+        focusDict(NotepadState.lookupWord);
+        NotepadState.lookupWord = "";
+    }
+
     Component.onCompleted: {
         // Opening straight onto a list tab still needs its data.
         if (mode !== 0)
             modeChanged();
         else
             focusCurrent();
+        takeLookup();
+    }
+
+    Connections {
+        target: NotepadState
+
+        function onLookupRequested(): void {
+            root.takeLookup();
+        }
     }
 
     // An Effects curve, not a Spatial one: this is a pure opacity cross-fade with

@@ -64,9 +64,13 @@ Singleton {
             if (!line.trim() || line.startsWith("-->") || /^Found \d+ items?/i.test(line))
                 continue;
 
-            // "  n 1: definition"  or  "  2: definition"
-            const m = line.match(/^\s+(?:([a-z]+)\s+)?(\d+):\s*(.*)$/);
-            if (m) {
+            // "  n 1: definition", "  2: definition", or -- for a word with a
+            // single sense -- "  n : definition" with no number at all. Missing
+            // that last form made every one-sense word read "No entry found".
+            // The part-of-speech tags are spelled out so a wrapped continuation
+            // line that happens to contain a colon is not mistaken for a sense.
+            const m = line.match(/^\s+(?:(n|v|adj|adv|a|s|r)\s+)?(\d+)?\s*:\s*(.*)$/);
+            if (m && (m[1] || m[2])) {
                 flush();
                 if (m[1]) {
                     group = {
@@ -82,7 +86,7 @@ Singleton {
                     out.push(group);
                 }
                 sense = {
-                    n: parseInt(m[2]),
+                    n: m[2] ? parseInt(m[2]) : 1,
                     text: m[3],
                     examples: []
                 };
@@ -122,8 +126,10 @@ Singleton {
     Process {
         id: proc
 
-        // -n: no interactive prompt. -0/-1 keep output plain.
-        command: ["sh", "-c", `command -v sdcv >/dev/null || { echo __NOSDCV__; exit 0; }; sdcv -n --utf8-output ${JSON.stringify(root.word)}`]
+        // -n: no interactive prompt. The word goes in as $1, never spliced into
+        // the script: it can be any text highlighted in any app (SUPER+SHIFT+D),
+        // and inside a double-quoted string `$(...)` would run.
+        command: ["sh", "-c", 'command -v sdcv >/dev/null || { echo __NOSDCV__; exit 0; }; exec sdcv -n --utf8-output -- "$1"', "sh", root.word]
 
         stdout: StdioCollector {
             onStreamFinished: {
