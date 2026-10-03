@@ -1,0 +1,8 @@
+#!/bin/sh
+# caelestia-shell 2.5.0 launches `caelestia record` through a Quickshell Process,
+# so the recorder inherits a stdout/stderr pipe whose reader closes when the CLI
+# exits ~1s later. gsr's next once-a-second "update fps" line then dies of
+# SIGPIPE, leaving an 88-byte recording.mp4. Ignored signals survive exec, so
+# the writes just fail with EPIPE and the recording carries on.
+trap '' PIPE
+exec /usr/bin/gpu-screen-recorder "$@"
