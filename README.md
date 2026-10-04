@@ -287,6 +287,14 @@ profile directory names contain spaces and parentheses.
 Only `~/.config/thorium` is synced; the ~2 GB of `~/.cache/thorium` is left on
 disk deliberately, since it is regenerable and would be pure overlay waste.
 
+Zen is defined but no longer in `BROWSERS`. On tmpfs its profile sat on
+`/run/user/1000`, which is 10% of RAM (1.6 GB), and Firefox sizes site storage
+from the volume the profile lives on. With many tabs open (WhatsApp Web alone
+kept ~200 MB) it hit that ceiling and showed the "running out of disk space,
+clear site data" bar. Before re-adding it, quit Zen and `systemctl --user stop
+psd` *first*: changing `BROWSERS` while psd is running leaves the profile on
+tmpfs, unsynced, until the next reboot wipes it.
+
 ---
 
 ## YouTube in the terminal
